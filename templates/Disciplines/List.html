@@ -66,8 +66,9 @@
     <div class="ui modal">
         <div class="header">Выберите xls файл c дисциплинами</div>
         <div class="content no-shadow">
-            <form method="post" class="ui form">
-                <input id="disciplines-path" type="text" readonly>
+            <form id="disciplines-form" enctype="multipart/form-data" method="post" class="ui form">
+                {% csrf_token %}
+                <input id="disciplines-path" type="text" name="filename" readonly>
                 <input id="disciplines-upload" type="file" name="disciplines" (change)="fileEvent($event)" accept=".xls, .xlsx">
                 <label for="disciplines-upload" class="ui medium primary right floated button">
                     <i class="ui upload icon"></i>
@@ -76,8 +77,8 @@
             </form>
         </div>
         <div class="actions">
-            <div class="ui primary button">Обновить</div>
-            <div class="ui primary button">Заменить</div>
+            <div id="update" class="ui primary button">Обновить</div>
+            <div id="replace" class="ui primary button">Заменить</div>
             <div class="ui cancel button" style="border-radius: 0">Отмена</div>
         </div>
     </div>
@@ -94,6 +95,18 @@
             $('#disciplines-upload').change(function () {
                 var path = $(this).val().split('\\');
                 $('#disciplines-path').val(path[path.length-1]);
+            });
+            $('#update').click(function () {
+                var formData = new FormData($('#disciplines-form').get(0));
+                $.ajax({url: '{% url 'disciplines:upload' %}',
+                        type: 'post',
+                        data: formData,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            console.log(data)
+                        }})
             })
         })
     </script>

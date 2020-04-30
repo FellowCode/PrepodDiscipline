@@ -6,12 +6,13 @@
 }
 
 .ui.modal {
-  .content{
-    padding-right: 200px;
-  }
-  .ui.button.primary{
+  label.ui.button.primary{
     position: absolute;
-    right: 0;
+    right: 20px;
+    top: 1px;
+  }
+  input[type=text]{
+    width: calc(100% - 150px);
   }
   input[type=file] {
     display: none;

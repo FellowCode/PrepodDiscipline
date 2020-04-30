@@ -3,5 +3,6 @@ from django.urls import path, include
 from .views import *
 
 urlpatterns = [
-    path('list/', desciplines_list, name='list')
+    path('list/', disciplines_list, name='list'),
+    path('upload/', disciplines_upload, name='upload')
 ]
