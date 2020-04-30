@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Список дисциплин | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container">
+        <div class="child-center">
+            <div class="discipline-list cblock">
+                <div class="content">
+                    <h1 class="ui center aligned header">Список дисциплин</h1>
+                    <div class="sixteen wide">
+                        <a onclick="showModal()" class="large ui primary button">Залить xls</a>
+                        <a href="" class="large ui primary button">Скачать xls</a>
+                    </div>
+                    <table class="ui celled table">
+                        <thead>
+                        <tr>
+                            <th>Форма</th>
+                            <th>Дисциплина</th>
+                            <th>Факультет</th>
+                            <th>Специальность</th>
+                            <th>Курс</th>
+                            <th>Семестр</th>
+                            <th>Период</th>
+                            <th>Трудоемкость</th>
+                            <th>Часов в нед.</th>
+                            <th>Часов СРС</th>
+                            <th>Часов по плану</th>
+                            <th>ЛК</th>
+                            <th>ПР</th>
+                            <th>ЛР</th>
+                            <th>Зачет</th>
+                            <th>Экзамен</th>
+                            <th>ВСЕГО</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for dis in disciplines %}
+                            <tr>
+                                <td data-label="Форма">{{ dis.form }}</td>
+                                <td data-label="Дисциплина">{{ dis.name }}</td>
+                                <td data-label="Факультет">{{ dis.fakultet }}</td>
+                                <td data-label="Специальность">{{ dis.specialnost }}</td>
+                                <td data-label="Курс">{{ dis.kurs }}</td>
+                                <td data-label="Семестр">{{ dis.semestr }}</td>
+                                <td data-label="Период">{{ dis.period }}</td>
+                                <td data-label="Трудоемкость">{{ dis.trudoemkost }}</td>
+                                <td data-label="Часов в нед.">{{ dis.chas_v_nedelu }}</td>
+                                <td data-label="Часов СРС">{{ dis.srs }}</td>
+                                <td data-label="Часов по плану">{{ dis.chas_po_planu }}</td>
+                                <td data-label="ЛК">{{ dis.lk }}</td>
+                                <td data-label="ПР">{{ dis.pr }}</td>
+                                <td data-label="ЛР">{{ dis.lr }}</td>
+                                <td data-label="Зачет">{{ dis.zachet }}</td>
+                                <td data-label="Экзамен">{{ dis.ekzamen }}</td>
+                                <td data-label="ВСЕГО">{{ dis.form }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui modal">
+        <div class="header">Выберите xls файл c дисциплинами</div>
+        <div class="content no-shadow">
+            <form method="post" class="ui form">
+                <input id="disciplines-path" type="text" readonly>
+                <input id="disciplines-upload" type="file" name="disciplines" (change)="fileEvent($event)" accept=".xls, .xlsx">
+                <label for="disciplines-upload" class="ui medium primary right floated button">
+                    <i class="ui upload icon"></i>
+                    Выбрать
+                </label>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui primary button">Обновить</div>
+            <div class="ui primary button">Заменить</div>
+            <div class="ui cancel button" style="border-radius: 0">Отмена</div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript">
+        $('.ui.checkbox').checkbox();
+
+        function showModal() {
+            $('.ui.modal').modal('show')
+        }
+
+        $(document).ready(function (){
+            $('#disciplines-upload').change(function () {
+                var path = $(this).val().split('\\');
+                $('#disciplines-path').val(path[path.length-1]);
+            })
+        })
+    </script>
+{% endblock %}

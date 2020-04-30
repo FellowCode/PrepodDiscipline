@@ -1,0 +1,23 @@
+.index {
+  width: 100%;
+  max-width: 900px;
+
+  h1.header {
+    margin: 20px;
+  }
+
+  h2 {
+    margin: 20px;
+  }
+
+  a.massive {
+    margin: 40px;
+
+    &.search-papers {
+      margin-bottom: 0;
+    }
+
+  }
+
+
+}

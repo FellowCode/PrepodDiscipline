@@ -1,0 +1,16 @@
+.login-form{
+  width: 100%;
+  max-width: 500px;
+  .form-container{
+    margin-top: 20px;
+    width: 95%;
+    max-width: 350px;
+  }
+  .ui.form{
+    margin-top: 10px;
+  }
+  button.ui.button{
+    margin-top: 30px;
+    min-width: 200px;
+  }
+}

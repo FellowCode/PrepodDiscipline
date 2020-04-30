@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Авторизация | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container">
+        <div class="child-center">
+            <div class="login-form cblock">
+                <div class="content">
+                    <div class="child-center">
+                        <div class="form-container">
+                            <h2 class="ui center aligned header">Авторизация</h2>
+                            <form class="ui form error" method="post">
+                                {% csrf_token %}
+                                {% if form.email.errors %}
+                                    <div class="ui error message">
+                                        {% for error in form.email.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="field">
+                                    <label>Email</label>
+                                    <input type="email" name="email" placeholder="Введите email..." value="{{ form.email.value|default_if_none:"" }}">
+                                </div>
+                                <div class="field">
+                                    <label>Пароль</label>
+                                    <input type="password" name="password" placeholder="Введите пароль...">
+                                </div>
+                                <div class="child-center">
+                                    <button class="large ui primary button">
+                                        Войти
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('button').click(function () {
+                $(this).addClass('loading')
+            });
+        })
+    </script>
+{% endblock %}

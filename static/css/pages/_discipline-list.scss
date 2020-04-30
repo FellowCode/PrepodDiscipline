@@ -1,0 +1,19 @@
+.discipline-list {
+  width: 100%;
+  max-width: 100%;
+
+
+}
+
+.ui.modal {
+  .content{
+    padding-right: 200px;
+  }
+  .ui.button.primary{
+    position: absolute;
+    right: 0;
+  }
+  input[type=file] {
+    display: none;
+  }
+}

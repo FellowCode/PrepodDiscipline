@@ -1,0 +1,24 @@
+{% load static %}
+<nav>
+    <div class="ui container">
+        <ul class="left">
+            <li class="logo">
+                <a href="{% url 'main:index' %}"><img alt="Biblior" src="{% static 'img/logo.png' %}"></a>
+            </li>
+        </ul>
+        {% if request.user.is_authenticated %}
+            <ul class="right">
+                {% if request.user.is_superuser %}
+                    <li><a href="/admin/"><i class="star plus icon"></i>Админка</a></li>
+                {% endif %}
+                <li><a href=""><i class="user plus icon"></i>Личный кабинет</a></li>
+                <li><a href="{% url 'accounts:logout' %}"><i class="sign out alternate icon"></i>Выход</a></li>
+            </ul>
+        {% else %}
+            <ul class="right">
+                <li><a href="{% url 'accounts:registration' %}"><i class="user plus icon"></i>Регистрация</a></li>
+                <li><a href="{% url 'accounts:login' %}"><i class="sign in alternate icon"></i>Вход</a></li>
+            </ul>
+        {% endif %}
+    </div>
+</nav>

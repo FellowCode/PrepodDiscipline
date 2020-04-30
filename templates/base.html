@@ -1,0 +1,74 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/png">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Condensed&display=swap" rel="stylesheet">
+
+    <link href="{% static 'css/semantic.min.css' %}?version=1" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}?version=4" rel="stylesheet">
+</head>
+<body>
+<header>
+    {% include 'navbar.html' %}
+</header>
+<main>
+
+    {% block content %}
+    {% endblock content %}
+</main>
+{% include 'footer.html' %}
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="{% static 'js/cookie.js' %}?version=1"></script>
+<script type="text/javascript" src="{% static 'js/jquery-3.4.1.min.js' %}?version=1"></script>
+<script type="text/javascript" src="{% static 'js/semantic.min.js' %}?version=1"></script>
+<script type="text/javascript" src="{% static 'js/cite_format.js' %}?version=3"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.ui.menu .item').click(function () {
+            $(this).closest('div').find('.active').removeClass('active');
+            $(this).addClass('active');
+            $(this).closest('.menu').find('input').val($(this).attr('data-value'))
+        });
+    });
+
+    function rus_to_latin(str) {
+
+        var ru = {
+            'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
+            'е': 'e', 'ё': 'e', 'ж': 'j', 'з': 'z', 'и': 'i',
+            'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
+            'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+            'ф': 'f', 'х': 'h', 'ц': 'c', 'ч': 'ch', 'ш': 'sh',
+            'щ': 'shch', 'ы': 'y', 'э': 'e', 'ю': 'u', 'я': 'ya'
+        }, n_str = [];
+
+        str = str.replace(/[ъь]+/g, '').replace(/й/g, 'i');
+
+        for (var i = 0; i < str.length; ++i) {
+            n_str.push(
+                ru[str[i]]
+                || ru[str[i].toLowerCase()] == undefined && str[i]
+                || ru[str[i].toLowerCase()].replace(/^(.)/, function (match) {
+                    return match.toUpperCase()
+                })
+            );
+        }
+
+        return n_str.join('');
+    }
+</script>
+{% block script %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load extensions %}
+
+{% block title %}Онлайн распределение рабочей нагрузки | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container">
+        <div class="child-center">
+            <div class="personal-area cblock">
+                <div class="content">
+                    <h2 class="ui center aligned header">Личный кабинет</h2>
+                    <h3>{{ request.user.first_name }} {{ request.user.last_name }}</h3>
+                    <div class="ui sixteen wide">
+                        <a href="{% url 'accounts:change_password' %}" class="medium ui primary button">
+                            Изменить пароль
+                        </a>
+                    </div>
+                    <h3 class="ui header aligned center">История</h3>
+                    <form class="ui form">
+                        <div class="field">
+                            <label>Поиск</label>
+                            <input type="text" name="search_cite" placeholder="Введите поисковой запрос..."
+                                   {% if query %}value="{{ query }}"{% endif %}>
+                            <button class="ui compact icon button primary">
+                                <i class="search icon"></i>
+                            </button>
+                        </div>
+
+                    </form>
+                    <div id="selected_cites">
+                        <div class="float-left">
+                            {% if sel_cites %}
+                                <p>Выбрано: <span>{{ sel_cites|length }}</span></p>
+                            {% else %}
+                                <p>Выбрано: <span>0</span></p>
+                            {% endif %}
+                        </div>
+                        <div class="float-left">
+                            <a id="group-cite" class="button primary ui">
+                                Цитировать
+                            </a>
+                        </div>
+                        <div class="float-left">
+                            <a id="reset_selected" class="button primary ui">
+                                Сбросить
+                            </a>
+                        </div>
+                    </div>
+                    <div id="pubs-history" class="full-width">
+                        <div id="pubs-items" class="full-width">
+                            {% if pubs|length > 0 %}
+                                <div class="ui form">
+                                    <table class="ui celled table">
+                                        <thead>
+                                        <tr>
+                                            <th>Библиографическая ссылка</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for pub in pubs|maxlength:40 %}
+                                            <tr>
+                                                <td data-type="gost">{{ pub.get_gost }}</td>
+                                                <td><a data-type="copybtn"><i class="copy right icon"></i></a></td>
+                                                <td>
+                                                    <a href="{% url 'pub:cite' %}?type={{ pub.type }}&doi={{ pub.doi }}&source=personal-area"><i
+                                                            class="edit right icon"></i></a></td>
+                                                <td>
+                                                    <div data-id="{{ pub.id }}"
+                                                         class="ui checkbox {% if sel_cites and pub.id in sel_cites %}checked{% endif %}">
+                                                        <input type="checkbox" tabindex="0" class="hidden"
+                                                               {% if sel_cites and pub.id in sel_cites %}checked{% endif %}>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            {% elif query %}
+                                <h4 class="ui header aligned center">Публикаций не найдено</h4>
+                            {% else %}
+                                <h4 class="ui header aligned center">В истории пока ничего нет</h4>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('a[data-type=copybtn]').click(function () {
+                var text = $(this).closest('tr').find('td[data-type=gost]').text();
+                var $temp = $("<input>");
+                $("body").append($temp);
+                $temp.val(text).select();
+                document.execCommand("copy");
+                $temp.remove();
+
+            });
+            setupSearch();
+            setupCheckbox();
+
+            //Cookies.set('selected_cites', []);
+            if (!Cookies.get('selected_cites')) {
+                Cookies.set('selected_cites', []);
+            }
+
+            var $sel_cites = $('#selected_cites span');
+            $('#reset_selected').click(function () {
+                $('.ui.checkbox.checked').each(function (index) {
+                    $(this).removeClass('checked').find('input').prop('checked', false)
+                });
+                Cookies.set('selected_cites', []);
+                $sel_cites.text(0);
+            });
+
+            $('#group-cite').click(function () {
+                if (Cookies.getJSON('selected_cites').length > 0){
+                    window.location = '{% url 'pub:group_cite' %}'
+                }
+            });
+
+            function setupSearch() {
+                $('form').submit(function (e) {
+                    e.preventDefault();
+                    var query = $('input[name=search_cite]').val();
+                    $('#pubs-history').load('{% url 'accounts:personal_area' %}?query=' + query + ' #pubs-items', function () {
+                        setupCheckbox();
+                    });
+                });
+            }
+
+            function setupCheckbox() {
+                $('.ui.checkbox').checkbox().click(function () {
+                    var sel_cites = Cookies.getJSON('selected_cites');
+                    var id = $(this).attr('data-id');
+                    if ($(this).hasClass('checked')) {
+                        const index = sel_cites.indexOf(id);
+                        if (index === -1)
+                            sel_cites.push(id);
+                        Cookies.set('selected_cites', sel_cites);
+                        $sel_cites.text(parseInt($sel_cites.text()) + 1)
+                    } else {
+                        const index = sel_cites.indexOf(id);
+                        if (index > -1) {
+                            sel_cites.splice(index, 1);
+                            $sel_cites.text(parseInt($sel_cites.text()) - 1)
+                        }
+                        Cookies.set('selected_cites', sel_cites)
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

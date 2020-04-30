@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Онлайн распределение рабочей нагрузки | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container">
+        <div class="child-center">
+            <div class="index cblock">
+                <div class="content">
+                    <h1 class="header">Онлайн распределение рабочей нагрузки</h1>
+                    <h2>Удобный просмотр и распределение раюочей нагрузки преподавателей</h2>
+                    {% if not user.is_authenticated %}
+                    <div class="sixteen wide">
+                        <a href="" class="search-papers massive ui primary button">
+
+                            Вход
+                            <i class="sign in alternate right icon"></i>
+                        </a>
+                    </div>
+                    <div class="sixteen wide">
+                        <a href="" class="massive ui primary button">
+
+                            Регистрация
+                            <i class="user plus right icon"></i>
+                        </a>
+                    </div>
+                    {% elif user.is_superuser %}
+                        <div class="sixteen wide">
+                            <a href="{% url 'disciplines:list' %}" class="search-papers massive ui primary button">
+                                Дисциплины
+                            </a>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript">
+        $('.ui.checkbox').checkbox();
+    </script>
+{% endblock %}

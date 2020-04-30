@@ -1,0 +1,21 @@
+footer{
+  display: block;
+  position: relative;
+  width: 100%;
+  margin-top: -45px;
+  height: 45px;
+  line-height: 45px;
+  background-color: var(--nav-bg-color);
+  color: var(--nav-color);
+  font-size: 1.1rem;
+  span{
+    line-height: inherit;
+
+    &.left{
+      float: left;
+    }
+    &.right{
+      float: right;
+    }
+  }
+}
