@@ -3,6 +3,11 @@ nav {
   height: $nav_height;
   background-color: var(--nav-bg-color);
   line-height: $nav_height;
+  .line{
+    width: 100%;
+    height: 4px;
+    background-color: var(--btn-primary-color);
+  }
   div.container{
     height: 100%;
     ul {

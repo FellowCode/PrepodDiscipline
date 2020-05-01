@@ -10,9 +10,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = MyUserManager()
     # Поля таблицы User
     email = models.EmailField(_('email address'), unique=True)
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
-    surname = models.CharField(max_length=64)
+    # first_name = models.CharField(max_length=64)
+    # last_name = models.CharField(max_length=64)
+    # surname = models.CharField(max_length=64)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)

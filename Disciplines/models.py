@@ -3,7 +3,12 @@ from utils.model_manager import MyManager
 
 
 class DisciplineForm(models.Model):
+    objects = MyManager()
+
     name = models.CharField(max_length=16, unique=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Форма дисциплины'
@@ -11,7 +16,12 @@ class DisciplineForm(models.Model):
 
 
 class Fakultet(models.Model):
+    objects = MyManager()
+
     name = models.CharField(max_length=16, unique=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Факультет'
@@ -19,7 +29,12 @@ class Fakultet(models.Model):
 
 
 class Specialnost(models.Model):
+    objects = MyManager()
+
     name = models.CharField(max_length=16, unique=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Специальность'
@@ -27,7 +42,12 @@ class Specialnost(models.Model):
 
 
 class Kafedra(models.Model):
+    objects = MyManager()
+
     name = models.CharField(max_length=16, unique=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Кафедра'
@@ -35,7 +55,12 @@ class Kafedra(models.Model):
 
 
 class Potok(models.Model):
+    objects = MyManager()
+
     name = models.CharField(max_length=128, unique=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Поток'
@@ -112,3 +137,10 @@ class Discipline(models.Model):
 
     def summary(self):
         return self.chas_po_planu + self.zachet + self.ekzamen + self.kontr_raboti + self.kr_kp + self.vkr + self.pr_ped + self.pr_dr + self.gak + self.aspirantura + self.rukovodstvo + self.dop_chasi
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Дисциплина'
+        verbose_name_plural = 'Дисциплины'

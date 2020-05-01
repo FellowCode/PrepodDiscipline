@@ -1,8 +1,18 @@
+.ui.container.full-width{
+  width: 100%;
+  max-width: 98% !important;
+}
+
 .discipline-list {
   width: 100%;
   max-width: 100%;
 
-
+  .table-container{
+    overflow-x: scroll;
+    margin-top: 10px;
+    border: 1px solid rgba(15, 15, 16, 0.18);
+    font-size: 12px;
+  }
 }
 
 .ui.modal {

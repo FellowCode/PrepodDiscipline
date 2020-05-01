@@ -23,9 +23,6 @@ class LoginForm(forms.Form):
 class RegistrationForm(forms.Form):
     email = forms.CharField(required=True)
 
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
-
     fpassword = forms.CharField(required=True)
     spassword = forms.CharField(required=True)
 

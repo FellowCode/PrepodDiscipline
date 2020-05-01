@@ -23,26 +23,6 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-                                <div class="two fields">
-                                    <div class="field">
-                                        <label>Фамилия</label>
-                                        <input type="text" name="last_name" placeholder="Введите фамилию..." value="{{ form.last_name.value|default_if_none:"" }}">
-                                    </div>
-                                    <div class="field">
-                                        <label>Имя</label>
-                                        <input type="text" name="first_name" placeholder="Введите имя..." value="{{ form.first_name.value|default_if_none:"" }}">
-                                    </div>
-                                </div>
-                                {% if form.first_name.errors or form.last_name.errors %}
-                                    <div class="ui error message">
-                                        {% for error in form.first_name.errors %}
-                                            <p>{{ error|safe }}</p>
-                                        {% endfor %}
-                                        {% for error in form.last_name.errors %}
-                                            <p>{{ error|safe }}</p>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
                                 <div class="field">
                                     <label>Пароль</label>
                                     <input type="password" name="fpassword" placeholder="Введите пароль..." value="{{ form.fpassword.value|default_if_none:"" }}">
