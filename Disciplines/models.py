@@ -1,5 +1,6 @@
 from django.db import models
 from utils.model_manager import MyManager
+from Prepods.models import Prepod
 
 
 class DisciplineForm(models.Model):
@@ -69,6 +70,10 @@ class Potok(models.Model):
 
 class Discipline(models.Model):
     objects = MyManager()
+
+    prepod = models.ForeignKey(Prepod, on_delete=models.SET_NULL, null=True, related_name='disciplines', verbose_name='Преподаватель')
+
+    prepod_available = models.ManyToManyField(Prepod, related_name='discipl_available', verbose_name='Доступен для преподавателей')
 
     code = models.CharField(max_length=5, verbose_name='Код')
     form = models.ForeignKey(DisciplineForm, on_delete=models.SET_NULL, null=True, verbose_name='Форма')

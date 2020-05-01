@@ -1,6 +1,5 @@
 from django.db import models
 from utils.model_manager import MyManager
-from Disciplines.models import Discipline
 from Accounts.models import User
 
 class Dolzhnost(models.Model):
@@ -34,14 +33,15 @@ class Prepod(models.Model):
 
     chasov_stavki = models.IntegerField(verbose_name="Часов ставки")
 
-    disciplines = models.ManyToManyField(Discipline, verbose_name="Дисциплины")
-
     class Meta:
         verbose_name = 'Преподаватель'
         verbose_name_plural = 'Преподаватели'
 
     def dolzhnost_name(self):
         return self.dolzhnost.name
+
+    def fio(self):
+        return self.__str__()
 
     def __str__(self):
         return f'{self.last_name} {self.first_name[0]}.{self.surname[0]}.'

@@ -7,6 +7,14 @@
   width: 100%;
   max-width: 100%;
 
+  .buttons {
+    width: 50%;
+    float: left;
+    margin-bottom: 10px;
+    .right{
+      float: right;
+    }
+  }
   .table-container{
     overflow-x: scroll;
     margin-top: 10px;

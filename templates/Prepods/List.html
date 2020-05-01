@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load modified %}
+
+{% block title %}Список дисциплин | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container full-width">
+        <div class="child-center">
+            <div class="discipline-list cblock">
+                <div class="content">
+                    <h1 class="ui center aligned header">Список преподавателей</h1>
+                    <form id="download-xls" method="post">
+                        {% csrf_token %}
+                        <div class="sixteen wide">
+                            <a onclick="showModal()" class="large ui primary button">Залить xls</a>
+                            <button type="submit" class="large ui primary button">Скачать xls</button>
+                            <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
+                               download="proposed_file_name">Скачать шаблон</a>
+                        </div>
+                    </form>
+
+                    <div class="sixteen wide table-container">
+                        <table class="ui celled table">
+                            <thead>
+                            <tr>
+                                <th>ФИО</th>
+                                <th>Должность</th>
+                                <th>Кв. уровень</th>
+                                <th>Н. Ставка</th>
+                                <th>Почасовка</th>
+                                <th>Часов ставки</th>
+                                <th>Дисциплины</th>
+                                <th>Дост.дисциплины</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for prepod in prepods %}
+                                <tr>
+                                    <td data-label="ФИО">{{ prepod.fio }}</td>
+                                    <td data-label="Должность">{{ prepod.dolzhnost.name }}</td>
+                                    <td data-label="Кв. уровень">{{ prepod.kv_uroven }}</td>
+                                    <td data-label="Н. Ставка">{{ prepod.n_stavka }}</td>
+                                    <td data-label="Почасовка">{{ prepod.pochasovka }}</td>
+                                    <td data-label="Часов ставки">{{ prepod.chasov_stavki }}</td>
+                                    <td data-label="Дисциплины"><a href="{% iurl 'prepods:disciplines' id='prepod.id' %}">Дисциплины</a></td>
+                                    <td data-label="Дост.дисциплины"><a href="{% iurl 'prepods:available' id='prepod.id' %}">Дост. дисциплины</a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui modal">
+        <div class="header">Выберите xls файл c дисциплинами</div>
+        <div id="loader" class="ui inverted dimmer">
+            <div class="ui text loader">Отправка файла...</div>
+        </div>
+        <div class="content no-shadow">
+            <form id="disciplines-form" enctype="multipart/form-data" method="post" class="ui form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update">
+                <input id="disciplines-path" type="text" name="filename" readonly>
+                <input id="disciplines-upload" type="file" name="disciplines" (change)="fileEvent($event)"
+                       accept=".xls, .xlsx">
+                <label for="disciplines-upload" class="ui medium primary right floated button">
+                    <i class="ui upload icon"></i>
+                    Выбрать
+                </label>
+            </form>
+        </div>
+        <div class="actions">
+            <div id="update" onclick="updateDisciplines()" class="ui primary button">Обновить</div>
+            <div id="replace" onclick="replaceDisciplines()" class="ui primary button">Заменить</div>
+            <div class="ui cancel button" style="border-radius: 0">Отмена</div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript">
+        $('.ui.checkbox').checkbox();
+
+        function showModal() {
+            $('.ui.modal').modal('show')
+        }
+
+        function updateDisciplines() {
+            $('input[name=action]').val('update');
+            var $loader = $('#loader').addClass('active');
+            sendDisciplines($loader);
+        }
+
+        function replaceDisciplines() {
+            $('input[name=action]').val('replace');
+            var $loader = $('#loader').addClass('active');
+            sendDisciplines($loader);
+        }
+
+        function sendDisciplines($loader) {
+            var formData = new FormData($('#disciplines-form').get(0));
+            $.ajax({
+                url: '{% url 'disciplines:upload' %}',
+                type: 'post',
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    console.log(data);
+                    $loader.removeClass('active');
+                },
+                error: function (data) {
+                    $loader.removeClass('active');
+                }
+            })
+        }
+
+        function downloadURI(uri, name) {
+            var link = document.createElement("a");
+            link.download = name;
+            link.href = uri;
+            link.click();
+        }
+
+        $(document).ready(function () {
+            $('#disciplines-upload').change(function () {
+                var path = $(this).val().split('\\');
+                $('#disciplines-path').val(path[path.length - 1]);
+            });
+            $('#download-xls').submit(function (e) {
+                e.preventDefault();
+                var formData = new FormData($(this).get(0));
+                $.ajax({
+                    url: '{% url 'disciplines:download' %}',
+                    type: 'post',
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        console.log(data);
+                        downloadURI('{% static 'files/disciplines.xls' %}', 'disciplines.xls')
+                    },
+                    error: function (data) {
+                    }
+                })
+            })
+        })
+    </script>
+{% endblock %}

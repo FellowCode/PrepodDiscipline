@@ -22,5 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include(('Accounts.urls', 'Accounts'), namespace='accounts')),
     path('disciplines/', include(('Disciplines.urls', 'Disciplines'), namespace='disciplines')),
+    path('prepods/', include(('Prepods.urls', 'Prepods'), namespace='prepods')),
     path('', include(('Main.urls', 'Main'), namespace='main')),
 ]
