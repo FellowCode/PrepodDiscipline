@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load extra %}
 
 {% block title %}Список дисциплин | ПГУ им. "Шолом-Алейхема"{% endblock %}
 
@@ -8,46 +9,104 @@
         <div class="child-center">
             <div class="discipline-list cblock">
                 <div class="content">
-                    <h1 class="ui center aligned header">Дисциплины {{ prepod.fio }}</h1>
-                    <form id="download-xls" method="post">
-                        {% csrf_token %}
-                        <div class="sixteen wide">
-                            <a onclick="showModal()" class="large ui primary button">Залить xls</a>
-                            <button type="submit" class="large ui primary button">Скачать xls</button>
-                            <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
-                               download="proposed_file_name">Скачать шаблон</a>
+                    <h1 class="ui center aligned header">Дисциплины для {{ prepod.fio }}</h1>
+                    <div class="data">
+                        <p>Должность: {{ prepod.dolzhnost.name }}</p>
+                        <p>Кв. уровень: {{ prepod.kv_uroven }}; Почасовка: {{ prepod.pochasovka|yes_no }}</p>
+                        <p>Часов ставки: {{ prepod.chasov_stavki }}; Н.Ставка: {{ prepod.n_stavka }}</p>
+                    </div>
+                    <div class="panel">
+                        <div class="buttons left">
+                            <div class="ui form">
+                                <div class="inline fields">
+                                    <div class="sixteen wide field">
+                                        <label>Поиск</label>
+                                        <input type="text" placeholder="Искать дисциплину..." name="search">
+                                    </div>
+                                    <div class="field">
+                                        <a id="search-btn" class="medium ui primary button"><i class="search icon"></i></a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </form>
+                        <form id="download-xls" method="post">
+                            {% csrf_token %}
+                        </form>
+                        <div class="buttons right">
+                            <button id="download-btn" type="submit" class="large ui primary button" form="download-xls">
+                                Скачать xls
+                            </button>
+                            {% if request.user.is_superuser %}
+                                <button id="save-btn" type="submit" class="large ui primary button right"
+                                        form="disciplines">Сохранить
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
 
                     <div class="sixteen wide table-container">
-                        <table class="ui celled table">
-                            <thead>
-                            <tr>
-                                <th>ФИО</th>
-                                <th>Должность</th>
-                                <th>Кв. уровень</th>
-                                <th>Н. Ставка</th>
-                                <th>Почасовка</th>
-                                <th>Часов ставки</th>
-                                <th>Дисциплины</th>
-                                <th>Дост.дисциплины</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for prepod in prepods %}
+                        <form id="disciplines" method="post">
+                            {% csrf_token %}
+                            <table class="ui sortable celled table">
+                                <thead>
                                 <tr>
-                                    <td data-label="ФИО">{{ prepod.fio }}</td>
-                                    <td data-label="Должность">{{ prepod.dolzhnost.name }}</td>
-                                    <td data-label="Кв. уровень">{{ prepod.kv_uroven }}</td>
-                                    <td data-label="Н. Ставка">{{ prepod.n_stavka }}</td>
-                                    <td data-label="Почасовка">{{ prepod.pochasovka }}</td>
-                                    <td data-label="Часов ставки">{{ prepod.chasov_stavki }}</td>
-                                    <td data-label="Дисциплины"><a href="">Дисциплины</a></td>
-                                    <td data-label="Дост.дисциплины"><a href="">Дост. дисциплины</a></td>
+                                    <th>Форма</th>
+                                    <th>Дисциплина</th>
+                                    <th>Факультет</th>
+                                    <th>Спец.</th>
+                                    <th>Курс</th>
+                                    <th>Сем.</th>
+                                    <th>Период</th>
+                                    <th>Труд.</th>
+                                    <th>Ч. СРС</th>
+                                    <th>Ч. по плану</th>
+                                    <th>ЛК</th>
+                                    <th>ПР</th>
+                                    <th>ЛР</th>
+                                    <th>Зачет</th>
+                                    <th>Экзамен</th>
+                                    <th>ВСЕГО</th>
+                                    {% if request.user.is_superuser %}
+                                        <th>Выбор</th>
+                                    {% endif %}
                                 </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                {% for dis in disciplines %}
+                                    <tr>
+                                    <td data-label="Форма">{{ dis.form.name }}</td>
+                                    <td data-label="Дисциплина">{% if request.user.is_superuser %}
+                                        <a href="/admin/Disciplines/discipline/{{ dis.id }}/change/">{{ dis.name }}</a>{% else %}
+                                        {{ dis.name }}{% endif %}</td>
+                                    <td data-label="Факультет">{{ dis.fakultet.name }}</td>
+                                    <td data-label="Спец.">{{ dis.specialnost.name }}</td>
+                                    <td data-label="Курс">{{ dis.kurs }}</td>
+                                    <td data-label="Сем.">{{ dis.semestr }}</td>
+                                    <td data-label="Период">{{ dis.period }}</td>
+                                    <td data-label="Труд.">{{ dis.trudoemkost }}</td>
+                                    <td data-label="Ч. СРС">{{ dis.srs }}</td>
+                                    <td data-label="Ч. по плану">{{ dis.chas_po_planu }}</td>
+                                    <td data-label="ЛК">{{ dis.lk }}</td>
+                                    <td data-label="ПР">{{ dis.pr }}</td>
+                                    <td data-label="ЛР">{{ dis.lr }}</td>
+                                    <td data-label="Зачет">{{ dis.zachet }}</td>
+                                    <td data-label="Экзамен">{{ dis.ekzamen }}</td>
+                                    <td data-label="ВСЕГО">{{ dis.summary }}</td>
+                                    {% if request.user.is_superuser %}
+                                        <td data-label="Выбор">
+                                            <div data-id="{{ dis.id }}"
+                                                 class="ui checkbox {% if prepod.disciplines and dis in prepod.disciplines.all %}checked{% endif %}">
+                                                <input type="checkbox" tabindex="0" class="hidden" value="{{ dis.id }}"
+                                                       name="discipline"
+                                                       {% if prepod.disciplines and dis in prepod.disciplines.all %}checked{% endif %}>
+                                            </div>
+                                        </td>
+                                    {% endif %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -79,6 +138,7 @@
     </div>
 {% endblock %}
 {% block script %}
+    <script type="text/javascript" src="{% static 'js/table_sort.js' %}"></script>
     <script type="text/javascript">
         $('.ui.checkbox').checkbox();
 
@@ -131,9 +191,10 @@
             });
             $('#download-xls').submit(function (e) {
                 e.preventDefault();
+                var $btn = $('#download-btn').addClass('loading');
                 var formData = new FormData($(this).get(0));
                 $.ajax({
-                    url: '{% url 'disciplines:download' %}',
+                    url: '/prepods/{{ prepod.id }}/disciplines/download/',
                     type: 'post',
                     data: formData,
                     cache: false,
@@ -141,11 +202,36 @@
                     contentType: false,
                     success: function (data) {
                         console.log(data);
-                        downloadURI('{% static 'files/disciplines.xls' %}', 'disciplines.xls')
+                        downloadURI(data['url'], data['filename']);
+                        $btn.removeClass('loading')
                     },
                     error: function (data) {
+                        $btn.removeClass('loading')
                     }
                 })
+            });
+            $('#disciplines').submit(function (e) {
+                e.preventDefault();
+                var $btn = $('#save-btn').addClass('loading');
+                $.post('', $(this).serialize(), function (data) {
+                    $btn.removeClass('loading')
+                })
+            });
+            $('table').tablesort();
+            var $items = $('table tbody tr');
+            var $list = $('table tbody');
+            $('#search-btn').click(function () {
+                var query = $('input[name=search]').val().split(' ');
+                var $search_items = $items.filter(function () {
+                    var result = true;
+                    var disc = $(this).find('[data-label=Дисциплина]').text().toLowerCase();
+                    query.forEach(function (val, i, a) {
+                        result = disc.includes(val.toLowerCase());
+                    });
+                    return result
+                });
+                $list.html("");
+                $list.append($search_items);
             })
         })
     </script>

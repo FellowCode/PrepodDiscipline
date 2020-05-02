@@ -11,7 +11,7 @@
                 {% if request.user.is_superuser %}
                     <li><a href="/admin/"><i class="star plus icon"></i>Админка</a></li>
                 {% endif %}
-                <li><a href=""><i class="user plus icon"></i>Личный кабинет</a></li>
+                <li><a>{% if request.user.prepod %}{{ request.user.prepod.fio }}{% else %}{{ request.user.email }}{% endif %}</a></li>
                 <li><a href="{% url 'accounts:logout' %}"><i class="sign out alternate icon"></i>Выход</a></li>
             </ul>
         {% else %}

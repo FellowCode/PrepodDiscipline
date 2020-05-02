@@ -1,4 +1,4 @@
-.ui.container.full-width{
+.ui.container.full-width {
   width: 100%;
   max-width: 98% !important;
 }
@@ -6,32 +6,52 @@
 .discipline-list {
   width: 100%;
   max-width: 100%;
-
-  .buttons {
-    width: 50%;
+  .data{
+    position: relative;
     float: left;
+    width: 100%;
     margin-bottom: 10px;
-    .right{
-      float: right;
+  }
+  .panel {
+    width: 100%;
+    float: left;
+    position: relative;
+    margin-bottom: 10px;
+    .buttons {
+      float: left;
+      .ui.form{
+        position: relative;
+        float: left;
+        max-width: 600px;
+        width: 100%;
+      }
+      &.left {
+        width: calc(100% - 300px)
+      }
+      &.right {
+        float: right;
+      }
     }
   }
-  .table-container{
+
+  .table-container {
     overflow-x: scroll;
-    margin-top: 10px;
     border: 1px solid rgba(15, 15, 16, 0.18);
     font-size: 12px;
   }
 }
 
 .ui.modal {
-  label.ui.button.primary{
+  label.ui.button.primary {
     position: absolute;
     right: 20px;
     top: 1px;
   }
-  input[type=text]{
+
+  input[type=text] {
     width: calc(100% - 150px);
   }
+
   input[type=file] {
     display: none;
   }

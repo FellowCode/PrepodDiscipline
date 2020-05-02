@@ -5,11 +5,34 @@ from xlutils.copy import copy
 
 from Disciplines.models import *
 
-cell_names = ['code', 'form', 'shifr', 'name', 'fakultet', 'specialnost', 'kurs', 'semestr', 'period', 'nedeli',
+CELL_NAMES = ['code', 'form', 'shifr', 'name', 'fakultet', 'specialnost', 'kurs', 'semestr', 'period', 'nedeli',
               'trudoemkost', 'chas_v_nedelu', 'srs', 'chas_po_planu', 'student', 'group', 'podgroup', 'lk', 'pr',
               'lr', 'k_tek', 'k_ekz', 'zachet', 'ekzamen', 'kontr_raboti', 'kr_kp', 'vkr', 'pr_ped', 'pr_dr', 'gak',
               'aspirantura', 'rukovodstvo', 'dop_chasi', 'summary', 'kafedra', 'potok']
-fk = {'form': DisciplineForm, 'fakultet': Fakultet, 'specialnost': Specialnost, 'kafedra': Kafedra, 'potok': Potok}
+FK = {'form': DisciplineForm, 'fakultet': Fakultet, 'specialnost': Specialnost, 'kafedra': Kafedra, 'potok': Potok}
+
+def _getOutCell(outSheet, colIndex, rowIndex):
+    """ HACK: Extract the internal xlwt cell representation. """
+    row = outSheet._Worksheet__rows.get(rowIndex)
+    if not row: return None
+
+    cell = row._Row__cells.get(colIndex)
+    return cell
+
+def setOutCell(outSheet, row, col, value):
+    """ Change cell value without changing formatting. """
+    # HACK to retain cell style.
+    previousCell = _getOutCell(outSheet, col, row)
+    # END HACK, PART I
+
+    outSheet.write(row, col, value)
+
+    # HACK, PART II
+    if previousCell:
+        newCell = _getOutCell(outSheet, col, row)
+        if newCell:
+            newCell.xf_idx = previousCell.xf_idx
+    # END HACK
 
 def handle_upload_disciplines(f, action):
     if not os.path.exists('tmp/xls'):
@@ -27,15 +50,15 @@ def handle_upload_disciplines(f, action):
         for rownum in range(1, sheet.nrows-1):
             d = Discipline()
             for i, val in enumerate(sheet.row_values(rownum)):
-                if i < len(cell_names):
-                    if cell_names[i] == 'summary':
+                if i < len(CELL_NAMES):
+                    if CELL_NAMES[i] == 'summary':
                         continue
-                    if cell_names[i] in fk:
-                        related = fk[cell_names[i]].objects.get_or_new(name=val)
+                    if CELL_NAMES[i] in FK:
+                        related = FK[CELL_NAMES[i]].objects.get_or_new(name=val)
                         related.save()
-                        setattr(d, cell_names[i], related)
+                        setattr(d, CELL_NAMES[i], related)
                     else:
-                        d.__dict__[cell_names[i]] = val
+                        d.__dict__[CELL_NAMES[i]] = val
             d.save()
 
 
@@ -45,11 +68,54 @@ def create_disciplines_xls():
     sheet = wb.get_sheet(0)
     ds = Discipline.objects.all()
     for i, d in enumerate(ds):
-        for j, key in enumerate(cell_names):
+        for j, key in enumerate(CELL_NAMES):
             val = getattr(d, key)
             if key == 'summary':
                 val = val()
-            if key in fk:
+            if key in FK:
                 val = val.name
             sheet.write(i+1, j, val)
     wb.save('static/files/disciplines.xls')
+
+
+def create_prep_ds_xls(prepod):
+    CELL_NAMES = ['name', 'spec_and_form', 'kurs', 'group_podgroup', 'student', 'trudoemkost',
+                  'audit_chasov', 'srs', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet',
+                  'ekzamen', 'kontr_raboti', 'kr_kp', 'vkr', 'pr_ped', 'pr_dr', 'gak',
+                  'aspirantura', 'rukovodstvo', 'dop_chasi', 'summary']
+
+    rb = xlrd.open_workbook('static/files/prep_ds_shablon.xls', formatting_info=True)
+    wb = copy(rb)
+    sheet = wb.get_sheet(0)
+    setOutCell(sheet, 6, 1, f'{prepod.last_name} {prepod.first_name} {prepod.surname}')
+    setOutCell(sheet, 6, 13, f'{prepod.dolzhnost.name}, {prepod.kv_uroven}')
+    setOutCell(sheet, 7, 14, prepod.n_stavka)
+
+    ds = prepod.disciplines.all()
+    osen = 0
+    vesna = 0
+
+    for d in ds:
+        print(d.period)
+        for j, key in enumerate(CELL_NAMES):
+            val = getattr(d, key)
+            if callable(val):
+                val = val()
+            if key in FK:
+                val = val.name
+            if d.period == 'осенний':
+                setOutCell(sheet, osen+10, j+1, val)
+            else:
+                setOutCell(sheet, vesna+72, j+1, val)
+
+        if d.period == 'осенний':
+            setOutCell(sheet, osen + 10, 0, osen + 1)
+            osen+=1
+        else:
+            setOutCell(sheet, vesna + 72, 0, vesna + 1)
+            vesna+=1
+
+    filename = f'{prepod.fio()} - дисциплины.xls'
+    url = f'static/files/{filename}'
+    wb.save(url)
+    return '/'+url, filename

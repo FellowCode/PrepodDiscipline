@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load modified %}
 
 {% block title %}Онлайн распределение рабочей нагрузки | ПГУ им. "Шолом-Алейхема"{% endblock %}
 
@@ -8,17 +9,17 @@
             <div class="index cblock">
                 <div class="content">
                     <h1 class="header">Онлайн распределение рабочей нагрузки</h1>
-                    <h2>Удобный просмотр и распределение раюочей нагрузки преподавателей</h2>
+                    <h2>Удобный просмотр и распределение рабочей нагрузки преподавателей</h2>
                     {% if not user.is_authenticated %}
                         <div class="sixteen wide">
-                            <a href="" class="search-papers massive ui primary button">
+                            <a href="{% url 'accounts:login' %}" class="search-papers massive ui primary button">
 
                                 Вход
                                 <i class="sign in alternate right icon"></i>
                             </a>
                         </div>
                         <div class="sixteen wide">
-                            <a href="" class="massive ui primary button">
+                            <a href="{% url 'accounts:registration' %}" class="massive ui primary button">
 
                                 Регистрация
                                 <i class="user plus right icon"></i>
@@ -35,8 +36,13 @@
                                 Преподаватели
                             </a>
                         </div>
+                    {% else %}
+                        <div class="sixteen wide">
+                            <a href="/prepods/{{ request.user.prepod.id }}/disciplines/" class="search-papers massive ui primary button">
+                                Дисциплины
+                            </a>
+                        </div>
                     {% endif %}
-
                 </div>
             </div>
         </div>

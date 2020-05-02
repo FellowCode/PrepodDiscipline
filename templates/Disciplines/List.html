@@ -9,30 +9,31 @@
             <div class="discipline-list cblock">
                 <div class="content">
                     <h1 class="ui center aligned header">Список дисциплин</h1>
-                    <form id="download-xls" method="post">
-                        {% csrf_token %}
-                        <div class="sixteen wide">
-                            <a onclick="showModal()" class="large ui primary button">Залить xls</a>
-                            <button type="submit" class="large ui primary button">Скачать xls</button>
-                            <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
-                               download="proposed_file_name">Скачать шаблон</a>
-                        </div>
-                    </form>
-
+                    <div class="panel">
+                        <form id="download-xls" method="post">
+                            {% csrf_token %}
+                            <div class="sixteen wide">
+                                <a onclick="showModal()" class="large ui primary button">Залить xls</a>
+                                <button type="submit" class="large ui primary button">Скачать xls</button>
+                                <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
+                                   download="proposed_file_name">Скачать шаблон</a>
+                            </div>
+                        </form>
+                    </div>
                     <div class="sixteen wide table-container">
 
 
-                        <table class="ui celled table">
+                        <table class="ui sortable celled table">
                             <thead>
                             <tr>
                                 <th>Форма</th>
                                 <th>Дисциплина</th>
                                 <th>Факультет</th>
-                                <th>Специальность</th>
+                                <th>Спец.</th>
                                 <th>Курс</th>
-                                <th>Семестр</th>
+                                <th>Сем.</th>
                                 <th>Период</th>
-                                <th>Трудоемкость</th>
+                                <th>Труд.</th>
                                 <th>Часов в нед.</th>
                                 <th>Часов СРС</th>
                                 <th>Часов по плану</th>
@@ -48,13 +49,13 @@
                             {% for dis in disciplines %}
                                 <tr>
                                     <td data-label="Форма">{{ dis.form.name }}</td>
-                                    <td data-label="Дисциплина">{{ dis.name }}</td>
+                                    <td data-label="Дисциплина"><a href="/admin/Disciplines/discipline/{{dis.id}}/change/">{{ dis.name }}</a></td>
                                     <td data-label="Факультет">{{ dis.fakultet.name }}</td>
-                                    <td data-label="Специальность">{{ dis.specialnost.name }}</td>
+                                    <td data-label="Спец.">{{ dis.specialnost.name }}</td>
                                     <td data-label="Курс">{{ dis.kurs }}</td>
-                                    <td data-label="Семестр">{{ dis.semestr }}</td>
+                                    <td data-label="Сем.">{{ dis.semestr }}</td>
                                     <td data-label="Период">{{ dis.period }}</td>
-                                    <td data-label="Трудоемкость">{{ dis.trudoemkost }}</td>
+                                    <td data-label="Труд.">{{ dis.trudoemkost }}</td>
                                     <td data-label="Часов в нед.">{{ dis.chas_v_nedelu }}</td>
                                     <td data-label="Часов СРС">{{ dis.srs }}</td>
                                     <td data-label="Часов по плану">{{ dis.chas_po_planu }}</td>
@@ -92,13 +93,13 @@
             </form>
         </div>
         <div class="actions">
-            <div id="update" onclick="updateDisciplines()" class="ui primary button">Обновить</div>
-            <div id="replace" onclick="replaceDisciplines()" class="ui primary button">Заменить</div>
+            <div id="replace" onclick="replaceDisciplines()" class="ui primary button">Отправить</div>
             <div class="ui cancel button" style="border-radius: 0">Отмена</div>
         </div>
     </div>
 {% endblock %}
 {% block script %}
+    <script type="text/javascript" src="{% static 'js/table_sort.js' %}"></script>
     <script type="text/javascript">
         $('.ui.checkbox').checkbox();
 
@@ -130,9 +131,11 @@
                 success: function (data) {
                     console.log(data);
                     $loader.removeClass('active');
+                    window.location.reload();
                 },
                 error: function (data) {
                     $loader.removeClass('active');
+                    window.location.reload();
                 }
             })
         }
@@ -166,7 +169,8 @@
                     error: function (data) {
                     }
                 })
-            })
+            });
+            $('table').tablesort()
         })
     </script>
 {% endblock %}

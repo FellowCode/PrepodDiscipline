@@ -47,9 +47,7 @@ def registration(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = User.objects.create_user(email=form.cleaned_data['email'],
-                                            password=form.cleaned_data['fpassword'],
-                                            first_name=form.cleaned_data['first_name'],
-                                            last_name=form.cleaned_data['last_name'])
+                                            password=form.cleaned_data['fpassword'])
             auth.login(request, user)
             return redirect(reverse('main:index'))
         return render(request, 'Accounts/Registration.html', {'form': form})

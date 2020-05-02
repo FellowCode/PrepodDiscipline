@@ -17,7 +17,7 @@ class Dolzhnost(models.Model):
 class Prepod(models.Model):
     objects = MyManager()
 
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='prepod')
 
     last_name = models.CharField(max_length=64, verbose_name="Фамилия")
     first_name = models.CharField(max_length=64, verbose_name="Имя")

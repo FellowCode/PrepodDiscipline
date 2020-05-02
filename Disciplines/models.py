@@ -6,7 +6,7 @@ from Prepods.models import Prepod
 class DisciplineForm(models.Model):
     objects = MyManager()
 
-    name = models.CharField(max_length=16, unique=True)
+    name = models.CharField(max_length=256, unique=True)
 
     def __str__(self):
         return self.name
@@ -19,7 +19,7 @@ class DisciplineForm(models.Model):
 class Fakultet(models.Model):
     objects = MyManager()
 
-    name = models.CharField(max_length=16, unique=True)
+    name = models.CharField(max_length=256, unique=True)
 
     def __str__(self):
         return self.name
@@ -32,7 +32,7 @@ class Fakultet(models.Model):
 class Specialnost(models.Model):
     objects = MyManager()
 
-    name = models.CharField(max_length=16, unique=True)
+    name = models.CharField(max_length=256, unique=True)
 
     def __str__(self):
         return self.name
@@ -45,7 +45,7 @@ class Specialnost(models.Model):
 class Kafedra(models.Model):
     objects = MyManager()
 
-    name = models.CharField(max_length=16, unique=True)
+    name = models.CharField(max_length=256, unique=True)
 
     def __str__(self):
         return self.name
@@ -58,7 +58,7 @@ class Kafedra(models.Model):
 class Potok(models.Model):
     objects = MyManager()
 
-    name = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=256, unique=True)
 
     def __str__(self):
         return self.name
@@ -73,13 +73,11 @@ class Discipline(models.Model):
 
     prepod = models.ForeignKey(Prepod, on_delete=models.SET_NULL, null=True, related_name='disciplines', verbose_name='Преподаватель')
 
-    prepod_available = models.ManyToManyField(Prepod, related_name='discipl_available', verbose_name='Доступен для преподавателей')
-
-    code = models.CharField(max_length=5, verbose_name='Код')
+    code = models.CharField(max_length=16, verbose_name='Код')
     form = models.ForeignKey(DisciplineForm, on_delete=models.SET_NULL, null=True, verbose_name='Форма')
 
     shifr = models.CharField(max_length=10, default='НЕТ', verbose_name='Шифр')
-    name = models.CharField(max_length=128, verbose_name='Дисциплина')
+    name = models.CharField(max_length=1024, verbose_name='Дисциплина')
 
     fakultet = models.ForeignKey(Fakultet, on_delete=models.SET_NULL, null=True, verbose_name='Факультет')
 
@@ -142,6 +140,15 @@ class Discipline(models.Model):
 
     def summary(self):
         return self.chas_po_planu + self.zachet + self.ekzamen + self.kontr_raboti + self.kr_kp + self.vkr + self.pr_ped + self.pr_dr + self.gak + self.aspirantura + self.rukovodstvo + self.dop_chasi
+
+    def spec_and_form(self):
+        return f'{self.specialnost.name} ({self.form.name})'
+
+    def group_podgroup(self):
+        return f'{self.group}/{self.podgroup}'
+
+    def audit_chasov(self):
+        return self.lk + self.pr + self.lr
 
     def __str__(self):
         return self.name
