@@ -17,25 +17,26 @@ class Dolzhnost(models.Model):
 class Prepod(models.Model):
     objects = MyManager()
 
+    DOLZHNOST = [('Зав. кафедрой', 'Зав. кафедрой'), ('Декан', 'Декан'), ('Профессор', 'Профессор'), ('Доцент', 'Доцент'), ('Ст. преподаватель', 'Ст. преподаватель'), ('Ассистент', 'Ассистент')]
+
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='prepod')
 
     last_name = models.CharField(max_length=64, verbose_name="Фамилия")
     first_name = models.CharField(max_length=64, verbose_name="Имя")
     surname = models.CharField(max_length=64, verbose_name="Отчество")
 
-    dolzhnost = models.ForeignKey(Dolzhnost, on_delete=models.SET_NULL, null=True, verbose_name="Должность")
+    #dolzhnost = models.ForeignKey(Dolzhnost, on_delete=models.SET_NULL, null=True, verbose_name="Должность")
+    dolzhnost = models.CharField(choices=DOLZHNOST, max_length=64, default='Зав. кафедрой')
 
     kv_uroven = models.IntegerField(verbose_name="Кв. уровень")
-
-    n_stavka = models.DecimalField(max_digits=4, decimal_places=2, verbose_name="Н.Ставка")
-
-    pochasovka = models.BooleanField(default=False, verbose_name="Почасовка")
 
     chasov_stavki = models.IntegerField(verbose_name="Часов ставки")
 
     class Meta:
         verbose_name = 'Преподаватель'
         verbose_name_plural = 'Преподаватели'
+
+        ordering = ['last_name']
 
     def dolzhnost_name(self):
         return self.dolzhnost.name

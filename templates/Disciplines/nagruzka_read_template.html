@@ -1,0 +1,61 @@
+<tr>
+    <td data-label="Преподаватель" >
+        {{ nagruzka.prepod.fio }}
+    </td>
+    <td data-label="Студ.">
+        {{ nagruzka.student }}
+    </td>
+    <td data-label="ЛК">
+        {{ nagruzka.lk }}
+    </td>
+    <td data-label="ПР">
+        {{ nagruzka.pr }}
+    </td>
+    <td data-label="ЛР">
+        {{ nagruzka.lr }}
+    </td>
+    <td data-label="К.Тек.">
+        {{ nagruzka.k_tek }}
+    </td>
+    <td data-label="К.Экз">
+        {{ nagruzka.k_ekz }}
+    </td>
+    <td data-label="Зачет">
+        {{ nagruzka.zachet }}
+    </td>
+    <td data-label="Экз.">
+        {{ nagruzka.ekzamen }}
+    </td>
+    <td data-label="Контр.р.">
+        {{ nagruzka.kontr_raboti }}
+    </td>
+    <td data-label="КР/КП">
+        {{ nagruzka.kr_kp }}
+    </td>
+    <td data-label="ВКР">
+        {{ nagruzka.vkr }}
+    </td>
+    <td data-label="Пр.Пед.">
+        {{ nagruzka.pr_ped }}
+    </td>
+    <td data-label="Пр.Др.">
+        {{ nagruzka.pr_dr }}
+    </td>
+    <td data-label="ГАК">
+        {{ nagruzka.gak }}
+    </td>
+    <td data-label="Мг/Асп">
+        {{ nagruzka.aspirantura }}
+    </td>
+    <td data-label="Руков.">
+        {{ nagruzka.rukovodstvo }}
+    </td>
+    <td data-label="Доп.ч.">
+        {{ nagruzka.dop_chasi }}
+    </td>
+    <td data-label="ИТОГО">
+        {{ nagruzka.summary|default:0 }}
+    </td>
+    <td>{% if template %}<a class="delete-btn">Удалить</a>{% endif %}</td>
+
+</tr>

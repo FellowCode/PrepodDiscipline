@@ -8,4 +8,4 @@ class DolzhnostAdmin(admin.ModelAdmin):
 
 @admin.register(Prepod)
 class PrepodAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'dolzhnost_name', 'kv_uroven', 'n_stavka', 'pochasovka', 'chasov_stavki']
+    list_display = ['__str__', 'dolzhnost_name', 'kv_uroven', 'chasov_stavki']

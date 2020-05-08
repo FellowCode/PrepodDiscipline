@@ -10,15 +10,30 @@
                 <div class="content">
                     <h1 class="ui center aligned header">Список дисциплин</h1>
                     <div class="panel">
-                        <form id="download-xls" method="post">
-                            {% csrf_token %}
-                            <div class="sixteen wide">
-                                <a onclick="showModal()" class="large ui primary button">Залить xls</a>
-                                <button type="submit" class="large ui primary button">Скачать xls</button>
-                                <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
-                                   download="proposed_file_name">Скачать шаблон</a>
+                        <div class="buttons left">
+                            <div class="ui form">
+                                <div class="inline fields">
+                                    <div class="sixteen wide field">
+                                        <label>Поиск</label>
+                                        <input type="text" placeholder="Искать дисциплину..." name="search">
+                                    </div>
+                                    <div class="field">
+                                        <a id="search-btn" class="medium ui primary button"><i class="search icon"></i></a>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
+                        </div>
+                        <div class="buttons right">
+                            <form id="download-xls" method="post">
+                                {% csrf_token %}
+                                <div class="sixteen wide">
+                                    <a onclick="showModal()" class="large ui primary button">Залить xls</a>
+                                    <button type="submit" class="large ui primary button">Скачать xls</button>
+                                    <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
+                                       download="proposed_file_name">Скачать шаблон</a>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                     <div class="sixteen wide table-container">
 
@@ -49,7 +64,9 @@
                             {% for dis in disciplines %}
                                 <tr>
                                     <td data-label="Форма">{{ dis.form.name }}</td>
-                                    <td data-label="Дисциплина"><a href="/admin/Disciplines/discipline/{{dis.id}}/change/">{{ dis.name }}</a></td>
+                                    <td data-label="Дисциплина"><a
+                                            href="/disciplines/{{ dis.id }}/nagruzka/">{{ dis.name }}</a>
+                                    </td>
                                     <td data-label="Факультет">{{ dis.fakultet.name }}</td>
                                     <td data-label="Спец.">{{ dis.specialnost.name }}</td>
                                     <td data-label="Курс">{{ dis.kurs }}</td>
@@ -171,6 +188,21 @@
                 })
             });
             $('table').tablesort()
+            var $items = $('table tbody tr');
+            var $list = $('table tbody');
+            $('#search-btn').click(function () {
+                var query = $('input[name=search]').val().split(' ');
+                var $search_items = $items.filter(function () {
+                    var result = true;
+                    var disc = $(this).find('[data-label=Дисциплина]').text().toLowerCase();
+                    query.forEach(function (val, i, a) {
+                        result = disc.includes(val.toLowerCase());
+                    });
+                    return result
+                });
+                $list.html("");
+                $list.append($search_items);
+            })
         })
     </script>
 {% endblock %}

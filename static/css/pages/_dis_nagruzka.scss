@@ -1,0 +1,27 @@
+.discipline-list {
+  table.nagruzka {
+    font-size: 12px;
+
+    td.error {
+      background-color: #ff7075 !important;
+      color: var(--color) !important;
+    }
+
+    td input[type=number], input[type=text] {
+      width: 40px !important;
+      padding: 2px !important;
+      text-align: center !important;
+
+      -moz-appearance: none !important;
+
+      &::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
+        -webkit-appearance: none !important;
+        margin: 0 !important;
+      }
+    }
+  }
+
+  .panel-buttons{
+    margin-top: 20px;
+  }
+}

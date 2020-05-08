@@ -71,8 +71,6 @@ class Potok(models.Model):
 class Discipline(models.Model):
     objects = MyManager()
 
-    prepod = models.ForeignKey(Prepod, on_delete=models.SET_NULL, null=True, related_name='disciplines', verbose_name='Преподаватель')
-
     code = models.CharField(max_length=16, verbose_name='Код')
     form = models.ForeignKey(DisciplineForm, on_delete=models.SET_NULL, null=True, verbose_name='Форма')
 
@@ -119,8 +117,8 @@ class Discipline(models.Model):
     ekzamen = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Экзамен')
 
     kontr_raboti = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Контр. раб.')
-    kr_kp = models.IntegerField(verbose_name='КР/КП')
-    vkr = models.IntegerField(verbose_name='ВКР')
+    kr_kp = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='КР/КП')
+    vkr = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='ВКР')
 
     pr_ped = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Практ.пед.')
 
@@ -128,18 +126,18 @@ class Discipline(models.Model):
 
     gak = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='ГАК')
 
-    aspirantura = models.IntegerField(verbose_name='Асп./Магистартура')
+    aspirantura = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Асп./Магистартура')
 
-    rukovodstvo = models.IntegerField(verbose_name='Руководство')
+    rukovodstvo = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Руководство')
 
-    dop_chasi = models.IntegerField(verbose_name='Доп. часы')
+    dop_chasi = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Доп. часы')
 
     kafedra = models.ForeignKey(Kafedra, on_delete=models.SET_NULL, null=True, verbose_name='Кафедра')
 
     potok = models.ForeignKey(Potok, on_delete=models.SET_NULL, null=True, verbose_name='Поток')
 
     def summary(self):
-        return self.chas_po_planu + self.zachet + self.ekzamen + self.kontr_raboti + self.kr_kp + self.vkr + self.pr_ped + self.pr_dr + self.gak + self.aspirantura + self.rukovodstvo + self.dop_chasi
+        return self.k_tek + self.k_ekz + self.lk + self.lr + self.pr + self.zachet + self.ekzamen + self.kontr_raboti + self.kr_kp + self.vkr + self.pr_ped + self.pr_dr + self.gak + self.aspirantura + self.rukovodstvo + self.dop_chasi
 
     def spec_and_form(self):
         return f'{self.specialnost.name} ({self.form.name})'
@@ -156,3 +154,60 @@ class Discipline(models.Model):
     class Meta:
         verbose_name = 'Дисциплина'
         verbose_name_plural = 'Дисциплины'
+        ordering = ['name']
+
+
+class Archive(models.Model):
+    discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
+
+    dt = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
+
+    class Meta:
+        verbose_name = 'Архив'
+        verbose_name_plural = 'Архивы'
+
+
+
+class Nagruzka(models.Model):
+    discipline = models.ForeignKey(Discipline, on_delete=models.SET_NULL, null=True, verbose_name="Дисциплина")
+
+    archive = models.ForeignKey(Archive, on_delete=models.SET_NULL, null=True, default=None, related_name='nagruzki')
+
+    prepod = models.ForeignKey(Prepod, on_delete=models.SET_NULL, null=True, verbose_name="Преподаватель")
+
+    student = models.IntegerField(verbose_name='Студентов')
+
+    lk = models.IntegerField(verbose_name='Лекции', default=0)
+    pr = models.IntegerField(verbose_name='Практические работы', default=0)
+    lr = models.IntegerField(verbose_name='Лабараторные работы', default=0)
+
+    k_tek = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Тек.кон.', default=0)
+    k_ekz = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Кон.экз', default=0)
+
+    zachet = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Зачет', default=0)
+    ekzamen = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Экзамен', default=0)
+
+    kontr_raboti = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Контр. раб.', default=0)
+    kr_kp = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='КР/КП', default=0)
+    vkr = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='ВКР', default=0)
+
+    pr_ped = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Практ.пед.', default=0)
+
+    pr_dr = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Практ.другая', default=0)
+
+    gak = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='ГАК', default=0)
+
+    aspirantura = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Асп./Магистартура', default=0)
+
+    rukovodstvo = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Руководство', default=0)
+
+    dop_chasi = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Доп. часы', default=0)
+
+    class Meta:
+        verbose_name = 'Нагрузка'
+        verbose_name_plural = 'Нагрузки'
+
+    def summary(self):
+        return self.k_tek + self.k_ekz + self.lk + self.lr + self.pr + self.zachet + self.ekzamen + self.kontr_raboti + self.kr_kp + self.vkr + self.pr_ped + self.pr_dr + self.gak + self.aspirantura + self.rukovodstvo + self.dop_chasi
+
+

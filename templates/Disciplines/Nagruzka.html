@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Список дисциплин | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container full-width">
+        <div class="child-center">
+            <div class="discipline-list cblock">
+                <div class="content">
+                    <h1 class="ui center aligned header">Нагрузка дисциплины</h1>
+                    <div class="sixteen wide table-container">
+                        <table class="ui sortable celled table">
+                            <thead>
+                            <tr>
+                                <th>Форма</th>
+                                <th>Дисциплина</th>
+                                <th>Факультет</th>
+                                <th>Спец.</th>
+                                <th>Курс</th>
+                                <th>Сем.</th>
+                                <th>Период</th>
+                                <th>Труд.</th>
+                                <th>Часов в нед.</th>
+                                <th>Часов СРС</th>
+                                <th>Часов по плану</th>
+                                <th>ЛК</th>
+                                <th>ПР</th>
+                                <th>ЛР</th>
+                                <th>Зачет</th>
+                                <th>Экзамен</th>
+                                <th>ВСЕГО</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td data-label="Форма">{{ dis.form.name }}</td>
+                                <td data-label="Дисциплина"><a
+                                        href="/admin/Disciplines/discipline/{{ dis.id }}/change/">{{ dis.name }}</a>
+                                </td>
+                                <td data-label="Факультет">{{ dis.fakultet.name }}</td>
+                                <td data-label="Спец.">{{ dis.specialnost.name }}</td>
+                                <td data-label="Курс">{{ dis.kurs }}</td>
+                                <td data-label="Сем.">{{ dis.semestr }}</td>
+                                <td data-label="Период">{{ dis.period }}</td>
+                                <td data-label="Труд.">{{ dis.trudoemkost }}</td>
+                                <td data-label="Часов в нед.">{{ dis.chas_v_nedelu }}</td>
+                                <td data-label="Часов СРС">{{ dis.srs }}</td>
+                                <td data-label="Часов по плану">{{ dis.chas_po_planu }}</td>
+                                <td data-label="ЛК">{{ dis.lk }}</td>
+                                <td data-label="ПР">{{ dis.pr }}</td>
+                                <td data-label="ЛР">{{ dis.lr }}</td>
+                                <td data-label="Зачет">{{ dis.zachet }}</td>
+                                <td data-label="Экзамен">{{ dis.ekzamen }}</td>
+                                <td data-label="ВСЕГО">{{ dis.summary }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sixteen wide">
+                        <h1 class="ui center aligned header">Распределение нагрузки</h1>
+                        <form id="nagruzka-form" method="post">
+                            {% csrf_token %}
+                            <table class="ui celled table nagruzka">
+                                <thead>
+                                <tr>
+                                    <th>Преподаватель</th>
+                                    <th>Студ.</th>
+                                    <th>ЛК</th>
+                                    <th>ПР</th>
+                                    <th>ЛР</th>
+                                    <th>К.Тек.</th>
+                                    <th>К.Экз</th>
+                                    <th>Зачет</th>
+                                    <th>Экз.</th>
+                                    <th>Контр.р.</th>
+                                    <th>КР/КП</th>
+                                    <th>ВКР</th>
+                                    <th>Пр.Пед.</th>
+                                    <th>Пр.Др.</th>
+                                    <th>ГАК</th>
+                                    <th>Мг/Асп</th>
+                                    <th>Руков.</th>
+                                    <th>Доп.ч.</th>
+                                    <th>ИТОГО</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                {% include 'Disciplines/nagruzka_edit_template.html' with template=True nagruzka=None %}
+
+                                {% for nagruzka in nagruzki %}
+                                    {% include 'Disciplines/nagruzka_read_template.html' with template=False nagruzka=nagruzka %}
+                                {% endfor %}
+
+                                <tr class="summary">
+                                    <td data-label="Преподаватель">Сумма:</td>
+                                    <td data-label="Студ.">{{ dis.student }}</td>
+                                    <td data-label="ЛК">{{ dis.lk }}</td>
+                                    <td data-label="ПР">{{ dis.pr }}</td>
+                                    <td data-label="ЛР">{{ dis.lr }}</td>
+                                    <td data-label="К.Тек.">{{ dis.k_tek }}</td>
+                                    <td data-label="К.Экз">{{ dis.k_ekz }}</td>
+                                    <td data-label="Зачет">{{ dis.zachet }}</td>
+                                    <td data-label="Экз.">{{ dis.ekzamen }}</td>
+                                    <td data-label="Контр.р.">{{ dis.kontr_raboti }}</td>
+                                    <td data-label="КР/КП">{{ dis.kr_kp }}</td>
+                                    <td data-label="ВКР">{{ dis.vkr }}</td>
+                                    <td data-label="Пр.Пед.">{{ dis.pr_ped }}</td>
+                                    <td data-label="Пр.Др.">{{ dis.pr_dr }}</td>
+                                    <td data-label="ГАК">{{ dis.gak }}</td>
+                                    <td data-label="Мг/Асп">{{ dis.aspirantura }}</td>
+                                    <td data-label="Руков.">{{ dis.rukovodstvo }}</td>
+                                    <td data-label="Доп.ч.">{{ dis.dop_chasi }}</td>
+                                    <td data-label="ИТОГО">{{ dis.summary }}</td>
+                                    <td></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                    <div class="sixteen wide panel-buttons">
+                        {% if nagruzki|length == 0 %}
+                            <a id="add-nagruzka" class="ui button large primary">Добавить нагрузку</a>
+                            <button id="save-nagruzka" type="submit" form="nagruzka-form"
+                                    class="ui button large primary disabled">
+                                Сохранить
+                            </button>
+                        {% else %}
+                            <a href="/disciplines/{{ dis.id }}/nagruzka/archiving/" class="ui button large primary">Новое
+                                распределение</a>
+                        {% endif %}
+                    </div>
+                    {% if archives|length > 0 %}
+                        <div class="sixteen wide">
+                            <h1 class="ui center aligned header">Архивы</h1>
+                            <table class="ui celled table archive structured">
+                                <thead>
+                                <tr>
+                                    <th>Преподаватель</th>
+                                    <th>Студ.</th>
+                                    <th>ЛК</th>
+                                    <th>ПР</th>
+                                    <th>ЛР</th>
+                                    <th>К.Тек.</th>
+                                    <th>К.Экз</th>
+                                    <th>Зачет</th>
+                                    <th>Экз.</th>
+                                    <th>Контр.р.</th>
+                                    <th>КР/КП</th>
+                                    <th>ВКР</th>
+                                    <th>Пр.Пед.</th>
+                                    <th>Пр.Др.</th>
+                                    <th>ГАК</th>
+                                    <th>Мг/Асп</th>
+                                    <th>Руков.</th>
+                                    <th>Доп.ч.</th>
+                                    <th>ИТОГО</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for archive in archives %}
+                                    <tr>
+                                        <td colspan="20" class="center aligned">{{ archive.dt }}</td>
+                                    </tr>
+                                    {% for nagruzka in archive.nagruzki.all %}
+                                        {% include 'Disciplines/nagruzka_read_template.html' with nagruzka=nagruzka %}
+                                    {% endfor %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript" src="{% static 'js/table_sort.js' %}"></script>
+    <script type="text/javascript">
+        function downloadURI(uri, name) {
+            var link = document.createElement("a");
+            link.download = name;
+            link.href = uri;
+            link.click();
+        }
+
+        $(document).ready(function () {
+            $('table.sortable').tablesort();
+
+            function setupDropdown() {
+                $('.dropdown').dropdown();
+            }
+
+            var error_count = 0;
+            var $save_btn = $('#save-nagruzka');
+
+            function checkColumn(index) {
+                var sum = 0.0;
+                $('table.nagruzka tbody tr:not(.hide):not(.summary)').each(function (i) {
+                    sum += parseFloat($($(this).find('td')[index]).find('input').val().replace(',', '.'))
+                });
+                var right_cell = $($('tr.summary td')[index]);
+                if (sum !== parseFloat(right_cell.text().replace(',', '.'))) {
+                    if (!right_cell.hasClass('error'))
+                        error_count += 1;
+                    right_cell.addClass('error');
+                } else if (right_cell.hasClass('error')) {
+                    right_cell.removeClass('error');
+                    error_count -= 1;
+                }
+                if (dropdown_unselect === 0) {
+                    if (error_count > 0)
+                        $save_btn.addClass('disabled');
+                    else
+                        $save_btn.removeClass('disabled');
+                }
+            }
+
+            function checkSummary() {
+                var sum = 0.0;
+                $('table.nagruzka tbody tr:not(.hide):not(.summary)').each(function (i) {
+                    sum += parseFloat($($(this).find('td')[18]).text().replace(',', '.'))
+                });
+                var right_cell = $($('tr.summary td')[18]);
+                if (sum !== parseFloat(right_cell.text().replace(',', '.'))) {
+                    if (!right_cell.hasClass('error'))
+                        error_count += 1;
+                    right_cell.addClass('error');
+                } else if (right_cell.hasClass('error')) {
+                    right_cell.removeClass('error');
+                    error_count -= 1;
+                }
+                if (dropdown_unselect === 0) {
+                    if (error_count > 0)
+                        $save_btn.addClass('disabled');
+                    else
+                        $save_btn.removeClass('disabled');
+                }
+            }
+
+            function setupInputs() {
+                $('table.nagruzka input').on('keyup', function () {
+                    var $inputs_row = $(this).closest('tr').find('input.calculate-summary');
+                    var sum_row = 0.0;
+                    var column = $(this).closest('td').index();
+                    $inputs_row.each(function (i) {
+                        sum_row += parseFloat($(this).val().replace(',', '.'))
+                    });
+                    checkColumn(column);
+                    $(this).closest('tr').find('[data-label=ИТОГО]').text(sum_row);
+                    checkSummary()
+                });
+            }
+
+            $('.delete-btn').click(function () {
+                $(this).closest('tr').remove();
+                for (var i = 1; i < 18; i++) {
+                    checkColumn(i)
+                }
+                checkSummary();
+                if (!$(this).closest('tr').find('.dropdown').hasClass('selected')) {
+                    dropdown_unselect -= 1;
+                    if (error_count === 0) {
+                        if (dropdown_unselect > 0)
+                            $save_btn.addClass('disabled');
+                        else
+                            $save_btn.removeClass('disabled');
+                    }
+                }
+            });
+            $('#add-nagruzka').click(function () {
+                $('table.nagruzka tbody').prepend($('#template-nagruzka').clone().removeClass('hide').removeAttr('id'));
+                for (var i = 1; i < 18; i++) {
+                    checkColumn(i)
+                }
+                checkSummary();
+                setupInputs();
+                setupDropdown();
+                dropdown_unselect += 1;
+                $save_btn.addClass('disabled');
+                $('.dropdown:not(.preselect)').dropdown('setting', 'onChange', function () {
+                    dropdown_unselect -= 1;
+                    $('.dropdown').addClass('selected');
+                    if (error_count === 0) {
+                        if (dropdown_unselect > 0)
+                            $save_btn.addClass('disabled');
+                        else
+                            $save_btn.removeClass('disabled');
+                    }
+
+                })
+            });
+            $('#nagruzka-form').submit(function (e) {
+                e.preventDefault();
+                var $btn = $('#save-nagruzka').addClass('loading');
+                var $template_inputs = $('#template-nagruzka input');
+                $template_inputs.attr('disabled', 'disabled');
+                $.post('/disciplines/{{ dis.id }}/nagruzka/save/', $(this).serialize(), function (data) {
+                    $btn.removeClass('loading');
+                    window.location.reload();
+                });
+                $template_inputs.removeAttr('disabled');
+            });
+            $('.dropdown.preselect').each(function (i) {
+                $(this).dropdown('set selected', $(this).attr('data-value'))
+            });
+            var dropdown_unselect = 0;
+        })
+    </script>
+{% endblock %}
