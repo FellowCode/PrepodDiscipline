@@ -1,61 +1,81 @@
 <tr>
-    <td data-label="Преподаватель" >
-        {{ nagruzka.prepod.fio }}
+    <td data-label="Преподаватель">
+        {% if archive or not editable %}
+            {{ nagruzka.prepod.fio }}
+        {% else %}
+        <input type="hidden" name="nagruzka_id" value="{{ nagruzka.id }}">
+        <div class="ui form">
+            <div class="field">
+                <div class="ui selection dropdown preselect"
+                     data-value="{{ nagruzka.prepod.id }}">
+                    <input type="hidden" name="prepod">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Преподаватель</div>
+                    <div class="menu">
+                        {% for prepod in prepods %}
+                            <div class="item"
+                                 data-value="{{ prepod.id }}">{{ prepod.fio }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </td>
-    <td data-label="Студ.">
-        {{ nagruzka.student }}
+    <td data-label="Студ." class="center aligned">
+        {{ nagruzka.student|default:'-' }}
     </td>
-    <td data-label="ЛК">
-        {{ nagruzka.lk }}
+    <td data-label="ЛК" class="center aligned">
+        {{ nagruzka.lk|default:'-' }}
     </td>
-    <td data-label="ПР">
-        {{ nagruzka.pr }}
+    <td data-label="ПР" class="center aligned">
+        {{ nagruzka.pr|default:'-' }}
     </td>
-    <td data-label="ЛР">
-        {{ nagruzka.lr }}
+    <td data-label="ЛР" class="center aligned">
+        {{ nagruzka.lr|default:'-' }}
     </td>
-    <td data-label="К.Тек.">
-        {{ nagruzka.k_tek }}
+    <td data-label="К.Тек." class="center aligned">
+        {{ nagruzka.k_tek|default:'-' }}
     </td>
-    <td data-label="К.Экз">
-        {{ nagruzka.k_ekz }}
+    <td data-label="К.Экз" class="center aligned">
+        {{ nagruzka.k_ekz|default:'-' }}
     </td>
-    <td data-label="Зачет">
-        {{ nagruzka.zachet }}
+    <td data-label="Зачет" class="center aligned">
+        {{ nagruzka.zachet|default:'-' }}
     </td>
-    <td data-label="Экз.">
-        {{ nagruzka.ekzamen }}
+    <td data-label="Экз." class="center aligned">
+        {{ nagruzka.ekzamen|default:'-' }}
     </td>
-    <td data-label="Контр.р.">
-        {{ nagruzka.kontr_raboti }}
+    <td data-label="Контр.р." class="center aligned">
+        {{ nagruzka.kontr_raboti|default:'-' }}
     </td>
-    <td data-label="КР/КП">
-        {{ nagruzka.kr_kp }}
+    <td data-label="КР/КП" class="center aligned">
+        {{ nagruzka.kr_kp|default:'-' }}
     </td>
-    <td data-label="ВКР">
-        {{ nagruzka.vkr }}
+    <td data-label="ВКР" class="center aligned">
+        {{ nagruzka.vkr|default:'-' }}
     </td>
-    <td data-label="Пр.Пед.">
-        {{ nagruzka.pr_ped }}
+    <td data-label="Пр.Пед." class="center aligned">
+        {{ nagruzka.pr_ped|default:'-' }}
     </td>
-    <td data-label="Пр.Др.">
-        {{ nagruzka.pr_dr }}
+    <td data-label="Пр.Др." class="center aligned">
+        {{ nagruzka.pr_dr|default:'-' }}
     </td>
-    <td data-label="ГАК">
-        {{ nagruzka.gak }}
+    <td data-label="ГАК" class="center aligned">
+        {{ nagruzka.gak|default:'-' }}
     </td>
-    <td data-label="Мг/Асп">
-        {{ nagruzka.aspirantura }}
+    <td data-label="Мг/Асп" class="center aligned">
+        {{ nagruzka.aspirantura|default:'-' }}
     </td>
-    <td data-label="Руков.">
-        {{ nagruzka.rukovodstvo }}
+    <td data-label="Руков." class="center aligned">
+        {{ nagruzka.rukovodstvo|default:'-' }}
     </td>
-    <td data-label="Доп.ч.">
-        {{ nagruzka.dop_chasi }}
+    <td data-label="Доп.ч." class="center aligned">
+        {{ nagruzka.dop_chasi|default:'-' }}
     </td>
-    <td data-label="ИТОГО">
+    <td data-label="ИТОГО" class="center aligned">
         {{ nagruzka.summary|default:0 }}
     </td>
-    <td>{% if template %}<a class="delete-btn">Удалить</a>{% endif %}</td>
+    <td class="center aligned">{% if template %}<a class="delete-btn">Удалить</a>{% endif %}</td>
 
 </tr>

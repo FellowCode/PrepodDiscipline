@@ -2,6 +2,11 @@
   table.nagruzka {
     font-size: 12px;
 
+    td{
+      padding-left: 3px !important;
+      padding-right: 3px !important;
+    }
+
     td.error {
       background-color: #ff7075 !important;
       color: var(--color) !important;

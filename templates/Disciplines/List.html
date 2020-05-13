@@ -8,7 +8,7 @@
         <div class="child-center">
             <div class="discipline-list cblock">
                 <div class="content">
-                    <h1 class="ui center aligned header">Список дисциплин</h1>
+                    <h1 class="ui center aligned header">Список дисциплин {% if prepod %}{{ prepod.fio }}{% endif %}</h1>
                     <div class="panel">
                         <div class="buttons left">
                             <div class="ui form">
@@ -23,21 +23,21 @@
                                 </div>
                             </div>
                         </div>
+                        {% if request.user.is_superuser %}
                         <div class="buttons right">
                             <form id="download-xls" method="post">
                                 {% csrf_token %}
                                 <div class="sixteen wide">
-                                    <a onclick="showModal()" class="large ui primary button">Залить xls</a>
+                                        <a onclick="showModal()" class="large ui primary button">Залить xls</a>
                                     <button type="submit" class="large ui primary button">Скачать xls</button>
                                     <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
                                        download="proposed_file_name">Скачать шаблон</a>
                                 </div>
                             </form>
                         </div>
+                        {% endif %}
                     </div>
                     <div class="sixteen wide table-container">
-
-
                         <table class="ui sortable celled table">
                             <thead>
                             <tr>

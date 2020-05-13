@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.http import JsonResponse, Http404
 from django.shortcuts import render
 
@@ -5,7 +6,6 @@ from Prepods.models import Prepod
 from Disciplines.models import Discipline
 
 from utils.xls import create_prep_ds_xls
-
 
 def prepods_list(request):
     return render(request, 'Prepods/List.html', {'prepods': Prepod.objects.all()})

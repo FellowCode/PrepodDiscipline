@@ -8,7 +8,7 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def iurl(context, viewname, **kwargs):
-    """example: 'groups:delete' signed_pk='nullable:selectedGroup.signed_pk'"""
+    """example: 'groups:delete' signed_pk='nullable:selectedGroup.signed_pk get_prepod='prepod.id'"""
     get = {}
     delete_keys = []
     for key, dots_var in kwargs.items():

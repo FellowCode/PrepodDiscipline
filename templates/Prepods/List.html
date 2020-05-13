@@ -25,12 +25,13 @@
                             <thead>
                             <tr>
                                 <th>ФИО</th>
+                                <th>Пользователь</th>
+                                <th>Кафедра</th>
                                 <th>Должность</th>
                                 <th>Кв. уровень</th>
-                                <th>Н. Ставка</th>
-                                <th>Почасовка</th>
                                 <th>Часов ставки</th>
                                 <th>Дисциплины</th>
+                                <th>Права</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -39,13 +40,14 @@
                                     <td data-label="ФИО"><a
                                             href="/admin/Prepods/prepod/{{ prepod.id }}/change/">{{ prepod.fio }}</a>
                                     </td>
-                                    <td data-label="Должность">{{ prepod.dolzhnost.name }}</td>
+                                    <td data-label="Пользователь">{{ prepod.user.email|default_if_none:"-" }}</td>
+                                    <td data-label="Кафедра">{{ prepod.kafedra.name }}</td>
+                                    <td data-label="Должность">{{ prepod.dolzhnost }}</td>
                                     <td data-label="Кв. уровень">{{ prepod.kv_uroven }}</td>
-                                    <td data-label="Н. Ставка">{{ prepod.n_stavka }}</td>
-                                    <td data-label="Почасовка">{{ prepod.pochasovka|yes_no }}</td>
                                     <td data-label="Часов ставки">{{ prepod.chasov_stavki }}</td>
                                     <td data-label="Дисциплины"><a
-                                            href="{% iurl 'prepods:disciplines' id='prepod.id' %}">Дисциплины</a></td>
+                                            href="{% iurl 'disciplines:list' get_prepod='prepod.id' %}">Дисциплины</a></td>
+                                    <td data-label="Права">{{ prepod.get_prava_display }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>

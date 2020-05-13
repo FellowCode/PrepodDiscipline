@@ -25,10 +25,10 @@
                                 <i class="user plus right icon"></i>
                             </a>
                         </div>
-                    {% elif user.is_superuser %}
+                    {% elif request.user.is_superuser or request.user.prepod.dolzhnost == 'Зав. кафедрой' %}
                         <div class="sixteen wide">
                             <a href="{% url 'disciplines:list' %}" class="search-papers massive ui primary button">
-                                Дисциплины
+                                Текущее распределение
                             </a>
                         </div>
                         <div class="sixteen wide">
@@ -36,11 +36,15 @@
                                 Преподаватели
                             </a>
                         </div>
+                    {% elif user.prepod %}
+                        <div class="sixteen wide">
+                            <a href="{% url 'disciplines:list' %}" class="search-papers massive ui primary button">
+                                Текущее распределение
+                            </a>
+                        </div>
                     {% else %}
                         <div class="sixteen wide">
-                            <a href="/prepods/{{ request.user.prepod.id }}/disciplines/" class="search-papers massive ui primary button">
-                                Дисциплины
-                            </a>
+                            <p>Вам не назначена карточка преподавателя.</p>
                         </div>
                     {% endif %}
                 </div>

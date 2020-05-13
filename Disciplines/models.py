@@ -158,6 +158,8 @@ class Discipline(models.Model):
 
 
 class Archive(models.Model):
+    objects = MyManager()
+
     discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
 
     dt = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
@@ -166,9 +168,13 @@ class Archive(models.Model):
         verbose_name = 'Архив'
         verbose_name_plural = 'Архивы'
 
+        ordering = ['-dt']
+
 
 
 class Nagruzka(models.Model):
+    objects = MyManager()
+
     discipline = models.ForeignKey(Discipline, on_delete=models.SET_NULL, null=True, verbose_name="Дисциплина")
 
     archive = models.ForeignKey(Archive, on_delete=models.SET_NULL, null=True, default=None, related_name='nagruzki')

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load modified %}
 
 {% block title %}Список дисциплин | ПГУ им. "Шолом-Алейхема"{% endblock %}
 
@@ -8,6 +9,7 @@
         <div class="child-center">
             <div class="discipline-list cblock">
                 <div class="content">
+                    <a href="{% url 'disciplines:list' %}">< Все дисциплины</a>
                     <h1 class="ui center aligned header">Нагрузка дисциплины</h1>
                     <div class="sixteen wide table-container">
                         <table class="ui sortable celled table">
@@ -91,29 +93,29 @@
                                 {% include 'Disciplines/nagruzka_edit_template.html' with template=True nagruzka=None %}
 
                                 {% for nagruzka in nagruzki %}
-                                    {% include 'Disciplines/nagruzka_read_template.html' with template=False nagruzka=nagruzka %}
+                                    {% include 'Disciplines/nagruzka_read_template.html' with template=False nagruzka=nagruzka editable=editable %}
                                 {% endfor %}
 
                                 <tr class="summary">
-                                    <td data-label="Преподаватель">Сумма:</td>
-                                    <td data-label="Студ.">{{ dis.student }}</td>
-                                    <td data-label="ЛК">{{ dis.lk }}</td>
-                                    <td data-label="ПР">{{ dis.pr }}</td>
-                                    <td data-label="ЛР">{{ dis.lr }}</td>
-                                    <td data-label="К.Тек.">{{ dis.k_tek }}</td>
-                                    <td data-label="К.Экз">{{ dis.k_ekz }}</td>
-                                    <td data-label="Зачет">{{ dis.zachet }}</td>
-                                    <td data-label="Экз.">{{ dis.ekzamen }}</td>
-                                    <td data-label="Контр.р.">{{ dis.kontr_raboti }}</td>
-                                    <td data-label="КР/КП">{{ dis.kr_kp }}</td>
-                                    <td data-label="ВКР">{{ dis.vkr }}</td>
-                                    <td data-label="Пр.Пед.">{{ dis.pr_ped }}</td>
-                                    <td data-label="Пр.Др.">{{ dis.pr_dr }}</td>
-                                    <td data-label="ГАК">{{ dis.gak }}</td>
-                                    <td data-label="Мг/Асп">{{ dis.aspirantura }}</td>
-                                    <td data-label="Руков.">{{ dis.rukovodstvo }}</td>
-                                    <td data-label="Доп.ч.">{{ dis.dop_chasi }}</td>
-                                    <td data-label="ИТОГО">{{ dis.summary }}</td>
+                                    <td data-label="Преподаватель" class="center aligned">Сумма:</td>
+                                    <td data-label="Студ." class="center aligned">{{ dis.student }}</td>
+                                    <td data-label="ЛК" class="center aligned">{{ dis.lk }}</td>
+                                    <td data-label="ПР" class="center aligned">{{ dis.pr }}</td>
+                                    <td data-label="ЛР" class="center aligned">{{ dis.lr }}</td>
+                                    <td data-label="К.Тек." class="center aligned">{{ dis.k_tek }}</td>
+                                    <td data-label="К.Экз" class="center aligned">{{ dis.k_ekz }}</td>
+                                    <td data-label="Зачет" class="center aligned">{{ dis.zachet }}</td>
+                                    <td data-label="Экз." class="center aligned">{{ dis.ekzamen }}</td>
+                                    <td data-label="Контр.р." class="center aligned">{{ dis.kontr_raboti }}</td>
+                                    <td data-label="КР/КП" class="center aligned">{{ dis.kr_kp }}</td>
+                                    <td data-label="ВКР" class="center aligned">{{ dis.vkr }}</td>
+                                    <td data-label="Пр.Пед." class="center aligned">{{ dis.pr_ped }}</td>
+                                    <td data-label="Пр.Др." class="center aligned">{{ dis.pr_dr }}</td>
+                                    <td data-label="ГАК" class="center aligned">{{ dis.gak }}</td>
+                                    <td data-label="Мг/Асп" class="center aligned">{{ dis.aspirantura }}</td>
+                                    <td data-label="Руков." class="center aligned">{{ dis.rukovodstvo }}</td>
+                                    <td data-label="Доп.ч." class="center aligned">{{ dis.dop_chasi }}</td>
+                                    <td data-label="ИТОГО" class="center aligned">{{ dis.summary }}</td>
                                     <td></td>
                                 </tr>
                                 </tbody>
@@ -121,57 +123,63 @@
                         </form>
                     </div>
                     <div class="sixteen wide panel-buttons">
-                        {% if nagruzki|length == 0 %}
-                            <a id="add-nagruzka" class="ui button large primary">Добавить нагрузку</a>
+                        {% if editable %}
+                            {% if nagruzki|length == 0 %}
+                                <a id="add-nagruzka" class="ui button large primary">Добавить нагрузку</a>
+                            {% else %}
+                                <a href="/disciplines/{{ dis.id }}/nagruzka/archiving/" class="ui button large primary">Новое
+                                    распределение</a>
+                            {% endif %}
                             <button id="save-nagruzka" type="submit" form="nagruzka-form"
-                                    class="ui button large primary disabled">
+                                    class="ui button large primary {% if not nagruzki %}disabled{% endif %}">
                                 Сохранить
                             </button>
-                        {% else %}
-                            <a href="/disciplines/{{ dis.id }}/nagruzka/archiving/" class="ui button large primary">Новое
-                                распределение</a>
                         {% endif %}
+
+
                     </div>
-                    {% if archives|length > 0 %}
-                        <div class="sixteen wide">
-                            <h1 class="ui center aligned header">Архивы</h1>
-                            <table class="ui celled table archive structured">
-                                <thead>
-                                <tr>
-                                    <th>Преподаватель</th>
-                                    <th>Студ.</th>
-                                    <th>ЛК</th>
-                                    <th>ПР</th>
-                                    <th>ЛР</th>
-                                    <th>К.Тек.</th>
-                                    <th>К.Экз</th>
-                                    <th>Зачет</th>
-                                    <th>Экз.</th>
-                                    <th>Контр.р.</th>
-                                    <th>КР/КП</th>
-                                    <th>ВКР</th>
-                                    <th>Пр.Пед.</th>
-                                    <th>Пр.Др.</th>
-                                    <th>ГАК</th>
-                                    <th>Мг/Асп</th>
-                                    <th>Руков.</th>
-                                    <th>Доп.ч.</th>
-                                    <th>ИТОГО</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for archive in archives %}
+                    {% if user.is_superuser or user.prepod.dolzhnost == 'Зав. кафедрой' %}
+                        {% if archives|length > 0 %}
+                            <div class="sixteen wide">
+                                <h1 class="ui center aligned header">Архивы</h1>
+                                <table class="ui celled table archive structured">
+                                    <thead>
                                     <tr>
-                                        <td colspan="20" class="center aligned">{{ archive.dt }}</td>
+                                        <th>Преподаватель</th>
+                                        <th>Студ.</th>
+                                        <th>ЛК</th>
+                                        <th>ПР</th>
+                                        <th>ЛР</th>
+                                        <th>К.Тек.</th>
+                                        <th>К.Экз</th>
+                                        <th>Зачет</th>
+                                        <th>Экз.</th>
+                                        <th>Контр.р.</th>
+                                        <th>КР/КП</th>
+                                        <th>ВКР</th>
+                                        <th>Пр.Пед.</th>
+                                        <th>Пр.Др.</th>
+                                        <th>ГАК</th>
+                                        <th>Мг/Асп</th>
+                                        <th>Руков.</th>
+                                        <th>Доп.ч.</th>
+                                        <th>ИТОГО</th>
+                                        <th></th>
                                     </tr>
-                                    {% for nagruzka in archive.nagruzki.all %}
-                                        {% include 'Disciplines/nagruzka_read_template.html' with nagruzka=nagruzka %}
+                                    </thead>
+                                    <tbody>
+                                    {% for archive in archives %}
+                                        <tr>
+                                            <td colspan="20" class="center aligned">{{ archive.dt }}</td>
+                                        </tr>
+                                        {% for nagruzka in archive.nagruzki.all %}
+                                            {% include 'Disciplines/nagruzka_read_template.html' with nagruzka=nagruzka dis=dis archive=True %}
+                                        {% endfor %}
                                     {% endfor %}
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -191,8 +199,10 @@
         $(document).ready(function () {
             $('table.sortable').tablesort();
 
-            function setupDropdown() {
-                $('.dropdown').dropdown();
+            function setupDropdown($nagruzka) {
+                var $dropdown = $($nagruzka.find('.dropdown'));
+                console.log($dropdown.attr('data-value'));
+                $dropdown.dropdown('set selected', $dropdown.attr('data-value'));
             }
 
             var error_count = 0;
@@ -201,7 +211,9 @@
             function checkColumn(index) {
                 var sum = 0.0;
                 $('table.nagruzka tbody tr:not(.hide):not(.summary)').each(function (i) {
-                    sum += parseFloat($($(this).find('td')[index]).find('input').val().replace(',', '.'))
+                    var val = $($(this).find('td')[index]).find('input').val().replace(',', '.').replace(/\s*/, '');
+                    if (val !== '')
+                        sum += parseFloat(val)
                 });
                 var right_cell = $($('tr.summary td')[index]);
                 if (sum !== parseFloat(right_cell.text().replace(',', '.'))) {
@@ -212,12 +224,10 @@
                     right_cell.removeClass('error');
                     error_count -= 1;
                 }
-                if (dropdown_unselect === 0) {
-                    if (error_count > 0)
-                        $save_btn.addClass('disabled');
-                    else
-                        $save_btn.removeClass('disabled');
-                }
+                if (error_count > 0)
+                    $save_btn.addClass('disabled');
+                else
+                    $save_btn.removeClass('disabled');
             }
 
             function checkSummary() {
@@ -234,21 +244,21 @@
                     right_cell.removeClass('error');
                     error_count -= 1;
                 }
-                if (dropdown_unselect === 0) {
-                    if (error_count > 0)
-                        $save_btn.addClass('disabled');
-                    else
-                        $save_btn.removeClass('disabled');
-                }
+                if (error_count > 0)
+                    $save_btn.addClass('disabled');
+                else
+                    $save_btn.removeClass('disabled');
             }
 
             function setupInputs() {
-                $('table.nagruzka input').on('keyup', function () {
+                $('table.nagruzka input.calculate-summary').on('keyup', function () {
                     var $inputs_row = $(this).closest('tr').find('input.calculate-summary');
                     var sum_row = 0.0;
                     var column = $(this).closest('td').index();
                     $inputs_row.each(function (i) {
-                        sum_row += parseFloat($(this).val().replace(',', '.'))
+                        var val = $(this).val().replace(',', '.').replace(/\s*/, '');
+                        if (val !== '')
+                            sum_row += parseFloat(val)
                     });
                     checkColumn(column);
                     $(this).closest('tr').find('[data-label=ИТОГО]').text(sum_row);
@@ -256,50 +266,54 @@
                 });
             }
 
-            $('.delete-btn').click(function () {
-                $(this).closest('tr').remove();
-                for (var i = 1; i < 18; i++) {
-                    checkColumn(i)
-                }
-                checkSummary();
-                if (!$(this).closest('tr').find('.dropdown').hasClass('selected')) {
-                    dropdown_unselect -= 1;
-                    if (error_count === 0) {
-                        if (dropdown_unselect > 0)
-                            $save_btn.addClass('disabled');
-                        else
-                            $save_btn.removeClass('disabled');
+            setupDeleteBtn();
+
+            function setupDeleteBtn() {
+                $('.delete-btn').click(function () {
+                    $(this).closest('tr').remove();
+                    for (var i = 1; i < 18; i++) {
+                        checkColumn(i)
                     }
-                }
-            });
+                    checkSummary();
+                    if (!$(this).closest('tr').find('.dropdown').hasClass('selected')) {
+                        dropdown_unselect -= 1;
+                        if (error_count === 0) {
+                            if (dropdown_unselect > 0)
+                                $save_btn.addClass('disabled');
+                            else
+                                $save_btn.removeClass('disabled');
+                        }
+                    }
+                });
+            }
+
             $('#add-nagruzka').click(function () {
-                $('table.nagruzka tbody').prepend($('#template-nagruzka').clone().removeClass('hide').removeAttr('id'));
-                for (var i = 1; i < 18; i++) {
+                var $nagruzka = $('#template-nagruzka').clone().removeClass('hide').removeAttr('id');
+                $('table.nagruzka tbody').prepend($nagruzka);
+                for (var i = 2; i < 18; i++) {
                     checkColumn(i)
                 }
                 checkSummary();
                 setupInputs();
-                setupDropdown();
-                dropdown_unselect += 1;
-                $save_btn.addClass('disabled');
-                $('.dropdown:not(.preselect)').dropdown('setting', 'onChange', function () {
-                    dropdown_unselect -= 1;
-                    $('.dropdown').addClass('selected');
-                    if (error_count === 0) {
-                        if (dropdown_unselect > 0)
-                            $save_btn.addClass('disabled');
-                        else
-                            $save_btn.removeClass('disabled');
-                    }
-
-                })
+                setupDropdown($nagruzka);
+                setupDeleteBtn();
             });
             $('#nagruzka-form').submit(function (e) {
                 e.preventDefault();
                 var $btn = $('#save-nagruzka').addClass('loading');
                 var $template_inputs = $('#template-nagruzka input');
                 $template_inputs.attr('disabled', 'disabled');
-                $.post('/disciplines/{{ dis.id }}/nagruzka/save/', $(this).serialize(), function (data) {
+                var $inputs = $(':not(#template-nagruzka) input');
+                $inputs.each(function (i) {
+                    if ($(this).val() === '')
+                        $(this).val(0)
+                });
+                {% if nagruzki|length == 0 %}
+                    var url = '/disciplines/{{ dis.id }}/nagruzka/save/';
+                {% else %}
+                    var url = '/disciplines/{{ dis.id }}/nagruzka/edit/';
+                {% endif %}
+                $.post(url, $(this).serialize(), function (data) {
                     $btn.removeClass('loading');
                     window.location.reload();
                 });
@@ -308,7 +322,11 @@
             $('.dropdown.preselect').each(function (i) {
                 $(this).dropdown('set selected', $(this).attr('data-value'))
             });
-            var dropdown_unselect = 0;
+
         })
     </script>
+
+
+
+
 {% endblock %}

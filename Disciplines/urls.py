@@ -8,5 +8,6 @@ urlpatterns = [
     path('download/', disciplines_download, name='download'),
     path('<dis_id>/nagruzka/', discipline_nagruzka, name='nagruzka'),
     path('<dis_id>/nagruzka/save/', save_nagruzka, name='save_nagruzka'),
+    path('<dis_id>/nagruzka/edit/', edit_nagruzka, name='edit_nagruzka'),
     path('<dis_id>/nagruzka/archiving/', archiving, name='archiving')
 ]

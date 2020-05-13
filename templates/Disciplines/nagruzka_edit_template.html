@@ -1,8 +1,9 @@
 <tr {% if template %}id="template-nagruzka" class="hide"{% endif %}>
-    <td data-label="Преподаватель" >
+    <td data-label="Преподаватель">
         <div class="ui form">
             <div class="field">
-                <div class="ui selection dropdown {% if nagruzka %}preselect{% endif %}" {% if nagruzka %}data-value="{{ nagruzka.prepod.id }}"{% endif %}>
+                <div class="ui selection dropdown {% if nagruzka %}preselect{% endif %}"
+                     data-value="{% if nagruzka %}{{ nagruzka.prepod.id }}{% endif %}{% if template %}{{ prepods.0.id }}{% endif %}">
                     <input type="hidden" name="prepod">
                     <i class="dropdown icon"></i>
                     <div class="default text">Преподаватель</div>
@@ -17,93 +18,145 @@
         </div>
     </td>
     <td data-label="Студ.">
-        <div class="ui form">
-            <input type="number" name="student" placeholder="" value="{{ nagruzka.student|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="number" name="student" placeholder="" value="{{ dis.student|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="ЛК">
-        <div class="ui form">
-            <input type="number"  class="calculate-summary" step="0.01" name="lk" placeholder="" value="{{ nagruzka.lk|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="number" class="calculate-summary" step="0.01" name="lk" placeholder=""
+                       value="{{ dis.lk|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="ПР">
-        <div class="ui form">
-            <input type="number" class="calculate-summary" step="0.01" name="pr" placeholder="" value="{{ nagruzka.pr|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="number" class="calculate-summary" step="0.01" name="pr" placeholder=""
+                       value="{{ dis.pr|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="ЛР">
-        <div class="ui form">
-            <input type="number" class="calculate-summary" step="0.01" name="lr" placeholder="" value="{{ nagruzka.lr|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="number" class="calculate-summary" step="0.01" name="lr" placeholder=""
+                       value="{{ dis.lr|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="К.Тек.">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,.][0-9]+)?" MaxLength="4" class="calculate-summary" name="k_tek" placeholder="" value="{{ nagruzka.k_tek|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,.][0-9]+)?" MaxLength="4" class="calculate-summary" name="k_tek"
+                       placeholder="" value="{{ dis.k_tek|default:"" }}">
+            </div>
         </div>
     </td>
     <td data-label="К.Экз">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary"  name="k_ekz" placeholder="" value="{{ nagruzka.k_ekz|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="k_ekz"
+                       placeholder="" value="{{ dis.k_ekz|default:"" }}">
+            </div>
         </div>
     </td>
     <td data-label="Зачет">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="zachet" placeholder="" value="{{ nagruzka.zachet|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="zachet"
+                       placeholder="" value="{{ dis.zachet|default:"" }}">
+            </div>
         </div>
     </td>
     <td data-label="Экз.">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="ekzamen" placeholder="" value="{{ nagruzka.ekzamen|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="ekzamen"
+                       placeholder="" value="{{ dis.ekzamen|default:"" }}">
+            </div>
         </div>
     </td>
     <td data-label="Контр.р.">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="kontr_raboti" placeholder="" value="{{ nagruzka.kontr_raboti|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary"
+                       name="kontr_raboti" placeholder="" value="{{ dis.kontr_raboti|default:"" }}">
+            </div>
         </div>
     </td>
     <td data-label="КР/КП">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="kr_kp" placeholder="" value="{{ nagruzka.kr_kp|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="kr_kp"
+                       placeholder="" value="{{ dis.kr_kp|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="ВКР">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="vkr" placeholder="" value="{{ nagruzka.vkr|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="vkr"
+                       placeholder="" value="{{ dis.vkr|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="Пр.Пед.">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="pr_ped" placeholder="" value="{{ nagruzka.pr_ped|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="pr_ped"
+                       placeholder="" value="{{ dis.pr_ped|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="Пр.Др.">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="pr_dr" placeholder="" value="{{ nagruzka.pr_dr|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="pr_dr"
+                       placeholder="" value="{{ dis.pr_dr|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="ГАК">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="gak" placeholder="" value="{{ nagruzka.gak|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="gak"
+                       placeholder="" value="{{ dis.gak|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="Мг/Асп">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="aspirantura" placeholder="" value="{{ nagruzka.aspirantura|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary"
+                       name="aspirantura"
+                       placeholder="" value="{{ dis.aspirantura|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="Руков.">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="rukovodstvo" placeholder="" value="{{ nagruzka.rukovodstvo|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary"
+                       name="rukovodstvo"
+                       placeholder="" value="{{ dis.rukovodstvo|default:'' }}">
+            </div>
         </div>
     </td>
     <td data-label="Доп.ч.">
-        <div class="ui form">
-            <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="dop_chasi" placeholder="" value="{{ nagruzka.dop_chasi|default:0 }}">
+        <div class="child-center">
+            <div class="ui form">
+                <input type="text" pattern="[0-9]+([,][0-9]+)?" MaxLength="4" class="calculate-summary" name="dop_chasi"
+                       placeholder="" value="{{ dis.dop_chasi|default:'' }}">
+            </div>
         </div>
     </td>
-    <td data-label="ИТОГО">
-        {{ nagruzka.summary|default:0 }}
+    <td data-label="ИТОГО" class="center aligned">
+        {{ dis.summary|default:'' }}
     </td>
-    <td>{% if template %}<a class="delete-btn">Удалить</a>{% endif %}</td>
+    <td>{% if template %}<a class="delete-btn" style="cursor: pointer">Удалить</a>{% endif %}</td>
 
 </tr>

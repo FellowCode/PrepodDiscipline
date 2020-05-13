@@ -7,8 +7,34 @@ from utils.xls import handle_upload_disciplines, create_disciplines_xls
 
 
 def disciplines_list(request):
-    disciplines = Discipline.objects.all()
-    return render(request, 'Disciplines/List.html', {'disciplines': disciplines})
+    def get_prepod_disciplines(prepod):
+        nagruzki = Nagruzka.objects.filter(prepod=prepod).all()
+        dis_ids = []
+        for nagruzka in nagruzki:
+            if not nagruzka.archive:
+                dis_ids.append(nagruzka.discipline.id)
+        return Discipline.objects.filter(id__in=dis_ids)
+
+    if not request.user.is_authenticated:
+        return Http404
+    if request.user.is_superuser or request.user.prepod.dolzhnost == 'Зав. кафедрой' or request.user.prepod.prava == 'raspred':
+        prepod_id = request.GET.get('prepod')
+        prepod = Prepod.objects.get_or_none(id=prepod_id)
+        if prepod:
+            disciplines = get_prepod_disciplines(prepod)
+        else:
+            disciplines = Discipline.objects.all()
+        if not request.user.is_superuser:
+            disciplines.filter(kafedra=request.user.prepod.kafedra).all()
+    elif request.user.prepod:
+        prepod = request.user.prepod
+        if request.user.prepod.prava == 'prosmotr':
+            disciplines = Discipline.objects.filter(kafedra=request.user.prepod.kafedra).all()
+        else:
+            disciplines = get_prepod_disciplines(prepod)
+    else:
+        raise Http404
+    return render(request, 'Disciplines/List.html', {'disciplines': disciplines, 'prepod': prepod})
 
 
 def disciplines_upload(request):
@@ -26,16 +52,16 @@ def disciplines_download(request):
 
 
 def discipline_nagruzka(request, dis_id):
-    if not request.user.is_superuser:
-        raise Http404
 
     dis = Discipline.objects.get_or_404(id=dis_id)
     prepods = Prepod.objects.all()
     nagruzki = Nagruzka.objects.filter(discipline=dis, archive=None).all()
     archives = Archive.objects.filter(discipline=dis).all()
 
+    editable = request.user.is_superuser or request.user.prepod == 'Зав. кафедрой' or request.user.prepod.prava == 'raspred'
+
     return render(request, 'Disciplines/Nagruzka.html',
-                  {'dis': dis, 'prepods': prepods, 'nagruzki': nagruzki, 'archives': archives})
+                  {'dis': dis, 'prepods': prepods, 'nagruzki': nagruzki, 'editable': editable, 'archives': archives})
 
 
 def save_nagruzka(request, dis_id):
@@ -43,7 +69,6 @@ def save_nagruzka(request, dis_id):
         raise Http404
 
     dis = Discipline.objects.get_or_404(id=dis_id)
-    prepods = Prepod.objects.all()
 
     CELL_NAMES = ['prepod', 'student', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet', 'ekzamen', 'kontr_raboti', 'kr_kp',
                   'vkr',
@@ -56,9 +81,30 @@ def save_nagruzka(request, dis_id):
             nagruzka[cell_name] = request.POST.getlist(cell_name, [])[i].replace(',', '.')
             if cell_name == 'prepod':
                 nagruzka[cell_name] = Prepod.objects.get(id=nagruzka[cell_name])
-        print(nagruzka)
         Nagruzka(**nagruzka).save()
         i += 1
+    return JsonResponse({'status': 'OK'})
+
+def edit_nagruzka(request, dis_id):
+    if not request.user.is_superuser:
+        raise Http404
+    dis = Discipline.objects.get_or_404(id=dis_id)
+    nagruzka_ids = request.POST.getlist('nagruzka_id')
+    prepod_ids = request.POST.getlist('prepod')
+
+    archive = Archive(discipline=dis)
+    archive.save()
+
+    nagruzki = Nagruzka.objects.filter(discipline=dis, archive=None).all()
+    for nagruzka in nagruzki:
+        nagruzka.archive = archive
+        nagruzka.save()
+        index = nagruzka_ids.index(str(nagruzka.id))
+        nagruzka.pk = None
+        nagruzka.archive = None
+        nagruzka.prepod = Prepod.objects.get(id=prepod_ids[index])
+        nagruzka.save()
+
     return JsonResponse({'status': 'OK'})
 
 
