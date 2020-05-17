@@ -69,8 +69,6 @@ def stavka_range():
 
 
 def save_nagruzka(request, dis_id):
-    if not request.user.is_superuser or not request.is_ajax() or not request.method == 'POST':
-        raise Http404
 
     dis = Discipline.objects.get_or_404(id=dis_id)
 
