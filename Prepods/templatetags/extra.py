@@ -10,3 +10,9 @@ def yes_no(val):
         return 'Да'
     else:
         return 'Нет'
+
+
+@register.filter
+def div(val1, val2):
+    return round(val1/val2, 2)
+

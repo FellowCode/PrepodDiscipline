@@ -1,0 +1,30 @@
+<div class="ui modal tiny">
+    <div class="header">Ставка</div>
+    <div class="content no-shadow">
+        <div class="ui form">
+            <div class="field">
+                <label>Н.Ставка</label>
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="n_stavka">
+                    <i class="dropdown icon"></i>
+                    <div class="default text"></div>
+                    <div class="menu">
+                        {% for i in stavka_range %}
+                            <div class="item" data-value="{{ i }}">{{ i }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="inline field">
+                <div class="ui checkbox">
+                    <input type="checkbox" tabindex="0" class="hidden" name="pochasovka">
+                    <label>Почасовка</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <div class="ui approve button primary">Применить</div>
+        <div class="ui cancel button">Отмена</div>
+    </div>
+</div>

@@ -52,7 +52,6 @@ def disciplines_download(request):
 
 
 def discipline_nagruzka(request, dis_id):
-
     dis = Discipline.objects.get_or_404(id=dis_id)
     prepods = Prepod.objects.all()
     nagruzki = Nagruzka.objects.filter(discipline=dis, archive=None).all()
@@ -61,7 +60,12 @@ def discipline_nagruzka(request, dis_id):
     editable = request.user.is_superuser or request.user.prepod == 'Зав. кафедрой' or request.user.prepod.prava == 'raspred'
 
     return render(request, 'Disciplines/Nagruzka.html',
-                  {'dis': dis, 'prepods': prepods, 'nagruzki': nagruzki, 'editable': editable, 'archives': archives})
+                  {'dis': dis, 'prepods': prepods, 'nagruzki': nagruzki, 'editable': editable, 'archives': archives,
+                   'edit': request.GET.get('edit'), 'stavka_range': stavka_range()})
+
+
+def stavka_range():
+    return [round(x * 0.05, 2) for x in range(21)]
 
 
 def save_nagruzka(request, dis_id):
@@ -70,9 +74,18 @@ def save_nagruzka(request, dis_id):
 
     dis = Discipline.objects.get_or_404(id=dis_id)
 
-    CELL_NAMES = ['prepod', 'student', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet', 'ekzamen', 'kontr_raboti', 'kr_kp',
+    CELL_NAMES = ['prepod', 'n_stavka', 'pochasovka', 'student', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet',
+                  'ekzamen', 'kontr_raboti', 'kr_kp',
                   'vkr',
                   'pr_ped', 'pr_dr', 'gak', 'aspirantura', 'rukovodstvo', 'dop_chasi']
+
+    nagruzki = Nagruzka.objects.filter(discipline=dis, archive=None).all()
+    if len(nagruzki) > 0:
+        archive = Archive(discipline=dis)
+        archive.save()
+        for nagruzka in nagruzki:
+            nagruzka.archive = archive
+            nagruzka.save()
 
     i = 0
     while i < len(request.POST.getlist('student', [])):
@@ -81,9 +94,13 @@ def save_nagruzka(request, dis_id):
             nagruzka[cell_name] = request.POST.getlist(cell_name, [])[i].replace(',', '.')
             if cell_name == 'prepod':
                 nagruzka[cell_name] = Prepod.objects.get(id=nagruzka[cell_name])
+            if cell_name == 'pochasovka':
+                nagruzka[cell_name] = nagruzka[cell_name].lower() == 'true'
+        print(nagruzka)
         Nagruzka(**nagruzka).save()
         i += 1
     return JsonResponse({'status': 'OK'})
+
 
 def edit_nagruzka(request, dis_id):
     if not request.user.is_superuser:
@@ -122,3 +139,40 @@ def archiving(request, dis_id):
     Nagruzka.objects.bulk_update(nagruzki, ['archive'])
 
     return redirect(f'/disciplines/{dis.id}/nagruzka/')
+
+
+from django.db.models import Sum
+
+
+def raspred_stavok(request):
+    vne_budget = request.GET.get('vne_budget')
+    if vne_budget:
+        nagruzki = Nagruzka.objects.filter(archive=None, discipline__form__name__contains='_В').all()
+    else:
+        nagruzki = Nagruzka.objects.filter(archive=None).exclude(discipline__form__name__contains='_В').all()
+    group_nagruzki = nagruzki.values('prepod__fio', 'prepod__dolzhnost',
+                                     'prepod__kv_uroven', 'n_stavka', 'pochasovka',
+                                     'prepod__chasov_stavki').order_by('prepod__fio').annotate(Sum('summary'))
+    return render(request, 'Disciplines/RaspredStavok.html',
+                  {'group_nagruzki': group_nagruzki, 'stavka_range': stavka_range, 'vne_budget': vne_budget})
+
+
+def raspred_stavok_save(request):
+    filter = request.POST.dict()
+    filter.pop('csrfmiddlewaretoken')
+    filter['pochasovka'] = filter['pochasovka'].lower() == 'true'
+    filter['n_stavka'] = filter['n_stavka'].replace(',', '.')
+    update = {'n_stavka': filter.pop('n_stavka_new').replace(',', '.')}
+    if 'pochasovka_new' in filter:
+        update['pochasovka'] = True
+        filter.pop('pochasovka_new')
+    else:
+        update['pochasovka'] = False
+    vne_budget = filter.pop('vne_budget') != 'None'
+    if vne_budget:
+        nagruzki = Nagruzka.objects.filter(archive=None, discipline__form__name__contains='_В').all()
+    else:
+        nagruzki = Nagruzka.objects.filter(archive=None).exclude(discipline__form__name__contains='_В').all()
+    nagruzki.filter(**filter).update(**update)
+
+    return redirect(reverse('disciplines:raspred_stavok'))

@@ -35,8 +35,9 @@
   }
 
   .table-container {
-    overflow-x: scroll;
-    border: 1px solid rgba(15, 15, 16, 0.18);
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible !important;
     font-size: 12px;
   }
 }

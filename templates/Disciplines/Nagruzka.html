@@ -59,14 +59,20 @@
                             </tbody>
                         </table>
                     </div>
+                    <h1 class="ui center aligned header">Распределение нагрузки</h1>
                     <div class="sixteen wide">
-                        <h1 class="ui center aligned header">Распределение нагрузки</h1>
                         <form id="nagruzka-form" method="post">
                             {% csrf_token %}
                             <table class="ui celled table nagruzka">
                                 <thead>
                                 <tr>
+                                    {% if edit or nagruzki|length == 0 %}
+                                        <th></th>
+                                    {% endif %}
                                     <th>Преподаватель</th>
+                                    {% if not edit and nagruzki|length > 0 %}
+                                        <th>Ставка</th>
+                                    {% endif %}
                                     <th>Студ.</th>
                                     <th>ЛК</th>
                                     <th>ПР</th>
@@ -85,19 +91,29 @@
                                     <th>Руков.</th>
                                     <th>Доп.ч.</th>
                                     <th>ИТОГО</th>
-                                    <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
 
                                 {% include 'Disciplines/nagruzka_edit_template.html' with template=True nagruzka=None %}
 
-                                {% for nagruzka in nagruzki %}
-                                    {% include 'Disciplines/nagruzka_read_template.html' with template=False nagruzka=nagruzka editable=editable %}
-                                {% endfor %}
-
+                                {% if edit %}
+                                    {% for nagruzka in nagruzki %}
+                                        {% include 'Disciplines/nagruzka_edit_template.html' with template=False nagruzka=nagruzka dis=nagruzka index=forloop.counter %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% for nagruzka in nagruzki %}
+                                        {% include 'Disciplines/nagruzka_read_template.html' with template=False nagruzka=nagruzka %}
+                                    {% endfor %}
+                                {% endif %}
                                 <tr class="summary">
+                                    {% if  edit or nagruzki|length == 0 %}
+                                        <td></td>
+                                    {% endif %}
                                     <td data-label="Преподаватель" class="center aligned">Сумма:</td>
+                                    {% if not edit and nagruzki|length > 0 %}
+                                        <td data-label="Ставка"></td>
+                                    {% endif %}
                                     <td data-label="Студ." class="center aligned">{{ dis.student }}</td>
                                     <td data-label="ЛК" class="center aligned">{{ dis.lk }}</td>
                                     <td data-label="ПР" class="center aligned">{{ dis.pr }}</td>
@@ -116,7 +132,7 @@
                                     <td data-label="Руков." class="center aligned">{{ dis.rukovodstvo }}</td>
                                     <td data-label="Доп.ч." class="center aligned">{{ dis.dop_chasi }}</td>
                                     <td data-label="ИТОГО" class="center aligned">{{ dis.summary }}</td>
-                                    <td></td>
+
                                 </tr>
                                 </tbody>
                             </table>
@@ -126,26 +142,39 @@
                         {% if editable %}
                             {% if nagruzki|length == 0 %}
                                 <a id="add-nagruzka" class="ui button large primary">Добавить нагрузку</a>
+                                <button id="save-nagruzka" type="submit" form="nagruzka-form"
+                                        class="ui button large primary {% if not nagruzki %}disabled{% endif %}">
+                                    Сохранить
+                                </button>
                             {% else %}
-                                <a href="/disciplines/{{ dis.id }}/nagruzka/archiving/" class="ui button large primary">Новое
-                                    распределение</a>
+                                {% if edit %}
+                                    <a id="add-nagruzka" class="ui button large primary">Добавить нагрузку</a>
+                                    <button id="save-nagruzka" type="submit" form="nagruzka-form"
+                                            class="ui button large primary {% if not nagruzki %}disabled{% endif %}">
+                                        Сохранить
+                                    </button>
+                                    <a href="/disciplines/{{ dis.id }}/nagruzka/"
+                                       class="ui button large primary">Отмена</a>
+                                {% else %}
+                                    <a href="/disciplines/{{ dis.id }}/nagruzka/archiving/"
+                                       class="ui button large primary">Новое
+                                        распределение</a>
+                                    <a href="?edit=True" class="ui button large primary">Редактировать</a>
+                                {% endif %}
                             {% endif %}
-                            <button id="save-nagruzka" type="submit" form="nagruzka-form"
-                                    class="ui button large primary {% if not nagruzki %}disabled{% endif %}">
-                                Сохранить
-                            </button>
                         {% endif %}
 
 
                     </div>
-                    {% if user.is_superuser or user.prepod.dolzhnost == 'Зав. кафедрой' %}
+                    {% if user.is_superuser %}
                         {% if archives|length > 0 %}
-                            <div class="sixteen wide">
-                                <h1 class="ui center aligned header">Архивы</h1>
+                            <h1 class="ui center aligned header">Архивы</h1>
+                            <div class="sixteen wide table-container">
                                 <table class="ui celled table archive structured">
                                     <thead>
                                     <tr>
                                         <th>Преподаватель</th>
+                                        <th>Ставка</th>
                                         <th>Студ.</th>
                                         <th>ЛК</th>
                                         <th>ПР</th>
@@ -164,7 +193,6 @@
                                         <th>Руков.</th>
                                         <th>Доп.ч.</th>
                                         <th>ИТОГО</th>
-                                        <th></th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -185,6 +213,7 @@
             </div>
         </div>
     </div>
+    {% include 'Disciplines/stavka_modal.html' %}
 {% endblock %}
 {% block script %}
     <script type="text/javascript" src="{% static 'js/table_sort.js' %}"></script>
@@ -233,9 +262,9 @@
             function checkSummary() {
                 var sum = 0.0;
                 $('table.nagruzka tbody tr:not(.hide):not(.summary)').each(function (i) {
-                    sum += parseFloat($($(this).find('td')[18]).text().replace(',', '.'))
+                    sum += parseFloat($($(this).find('td')[19]).text().replace(',', '.'))
                 });
-                var right_cell = $($('tr.summary td')[18]);
+                var right_cell = $($('tr.summary td')[19]);
                 if (sum !== parseFloat(right_cell.text().replace(',', '.'))) {
                     if (!right_cell.hasClass('error'))
                         error_count += 1;
@@ -271,7 +300,7 @@
             function setupDeleteBtn() {
                 $('.delete-btn').click(function () {
                     $(this).closest('tr').remove();
-                    for (var i = 1; i < 18; i++) {
+                    for (var i = 3; i < 19; i++) {
                         checkColumn(i)
                     }
                     checkSummary();
@@ -287,16 +316,19 @@
                 });
             }
 
+            var index = 100;
             $('#add-nagruzka').click(function () {
-                var $nagruzka = $('#template-nagruzka').clone().removeClass('hide').removeAttr('id');
+                index += 1;
+                var $nagruzka = $('#template-nagruzka').clone().removeClass('hide').attr('id', index);
                 $('table.nagruzka tbody').prepend($nagruzka);
-                for (var i = 2; i < 18; i++) {
+                for (var i = 3; i < 19; i++) {
                     checkColumn(i)
                 }
                 checkSummary();
                 setupInputs();
                 setupDropdown($nagruzka);
                 setupDeleteBtn();
+                setupStavkaBtn();
             });
             $('#nagruzka-form').submit(function (e) {
                 e.preventDefault();
@@ -308,22 +340,55 @@
                     if ($(this).val() === '')
                         $(this).val(0)
                 });
-                {% if nagruzki|length == 0 %}
-                    var url = '/disciplines/{{ dis.id }}/nagruzka/save/';
-                {% else %}
-                    var url = '/disciplines/{{ dis.id }}/nagruzka/edit/';
-                {% endif %}
+                var url = '/disciplines/{{ dis.id }}/nagruzka/save/';
                 $.post(url, $(this).serialize(), function (data) {
                     $btn.removeClass('loading');
-                    window.location.reload();
+                    window.location = '/disciplines/{{ dis.id }}/nagruzka/';
                 });
                 $template_inputs.removeAttr('disabled');
             });
             $('.dropdown.preselect').each(function (i) {
                 $(this).dropdown('set selected', $(this).attr('data-value'))
             });
+            setupStavkaBtn();
 
-        })
+            function OnApproveModal() {
+                var row_id = $(this).closest('.modal').attr('data-row-id');
+                var $row = $('#' + row_id);
+                var $modal = $('.ui.modal');
+                var n_stavka = $modal.find('input[name=n_stavka]').val();
+                var pochasovka = $modal.find('.ui.checkbox').hasClass('checked');
+                $row.find('input[name=n_stavka]').val(n_stavka);
+                $row.find('input[name=pochasovka]').val(pochasovka);
+                if (pochasovka) {
+                    $row.find('a.stavka span').text(n_stavka + ' П');
+                } else {
+                    $row.find('a.stavka span').text(n_stavka);
+                }
+                console.log('n_stavka', n_stavka, pochasovka)
+            }
+
+            function setupStavkaBtn() {
+
+                $('a.stavka').click(function () {
+                    var $modal = $('.ui.modal').attr('data-row-id', $(this).closest('tr').attr('id'));
+                    $modal.modal({autofocus: false, onApprove: OnApproveModal}).modal('show');
+                    var n_stavka = $(this).closest('td').find('input[name=n_stavka]').val();
+                    var pochasovka = $(this).closest('td').find('input[name=pochasovka]').val().toLowerCase() === 'true';
+                    var $dropdown = $modal.find('.dropdown');
+                    $dropdown.dropdown();
+                    $dropdown.dropdown('set selected', n_stavka);
+                    var $pochasovka = $modal.find('.ui.checkbox');
+                    $pochasovka.checkbox();
+                    if (pochasovka)
+                        $pochasovka.checkbox('check');
+                    else
+                        $pochasovka.checkbox('uncheck');
+                })
+            }
+
+
+        });
     </script>
 
 

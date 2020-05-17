@@ -181,6 +181,9 @@ class Nagruzka(models.Model):
 
     prepod = models.ForeignKey(Prepod, on_delete=models.SET_NULL, null=True, verbose_name="Преподаватель")
 
+    n_stavka = models.DecimalField(max_digits=4, decimal_places=2, default=0)
+    pochasovka = models.BooleanField(default=False)
+
     student = models.IntegerField(verbose_name='Студентов')
 
     lk = models.IntegerField(verbose_name='Лекции', default=0)
@@ -209,11 +212,24 @@ class Nagruzka(models.Model):
 
     dop_chasi = models.DecimalField(max_digits=4, decimal_places=2, verbose_name='Доп. часы', default=0)
 
+    summary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f'{self.discipline.name} {self.discipline.form}'
+
+    def save(self, **kwargs):
+        self.summary = self.get_summary()
+        super().save(**kwargs)
+
     class Meta:
         verbose_name = 'Нагрузка'
         verbose_name_plural = 'Нагрузки'
 
-    def summary(self):
-        return self.k_tek + self.k_ekz + self.lk + self.lr + self.pr + self.zachet + self.ekzamen + self.kontr_raboti + self.kr_kp + self.vkr + self.pr_ped + self.pr_dr + self.gak + self.aspirantura + self.rukovodstvo + self.dop_chasi
+    def get_summary(self):
+        fields = ['k_tek', 'k_ekz', 'lk', 'lr', 'pr', 'zachet', 'ekzamen', 'kontr_raboti', 'kr_kp', 'vkr', 'pr_ped', 'pr_dr', 'gak', 'aspirantura', 'rukovodstvo', 'dop_chasi']
+        sum = 0
+        for field in fields:
+            sum += float(getattr(self, field))
+        return sum
 
 

@@ -9,5 +9,8 @@ urlpatterns = [
     path('<dis_id>/nagruzka/', discipline_nagruzka, name='nagruzka'),
     path('<dis_id>/nagruzka/save/', save_nagruzka, name='save_nagruzka'),
     path('<dis_id>/nagruzka/edit/', edit_nagruzka, name='edit_nagruzka'),
-    path('<dis_id>/nagruzka/archiving/', archiving, name='archiving')
+    path('<dis_id>/nagruzka/archiving/', archiving, name='archiving'),
+    path('raspred-stavok/save/', raspred_stavok_save, name='raspred_stavok_save'),
+    path('raspred-stavok/', raspred_stavok, name='raspred_stavok'),
+
 ]

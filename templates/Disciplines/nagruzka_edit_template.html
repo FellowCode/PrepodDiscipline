@@ -1,4 +1,5 @@
-<tr {% if template %}id="template-nagruzka" class="hide"{% endif %}>
+<tr {% if template %}id="template-nagruzka" class="hide"{% else %}id="{{ index }}"{% endif %}>
+    <td class="center aligned"><a class="delete-btn" style="cursor: pointer"><i class="icon close"></i></a></td>
     <td data-label="Преподаватель">
         <div class="ui form">
             <div class="field">
@@ -16,6 +17,9 @@
                 </div>
             </div>
         </div>
+        <input type="hidden" name="n_stavka" value="{{ dis.n_stavka|default:"0,0" }}">
+        <input type="hidden" name="pochasovka" value="{{ dis.pochasovka| default_if_none:"false" }}">
+        <a class="stavka" style="cursor: pointer">Ставка (<span>{{ dis.n_stavka|default:0 }}{% if dis.pochasovka %} П{% endif %}</span>)</a>
     </td>
     <td data-label="Студ.">
         <div class="child-center">
@@ -157,6 +161,4 @@
     <td data-label="ИТОГО" class="center aligned">
         {{ dis.summary|default:'' }}
     </td>
-    <td>{% if template %}<a class="delete-btn" style="cursor: pointer">Удалить</a>{% endif %}</td>
-
 </tr>

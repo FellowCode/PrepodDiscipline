@@ -31,6 +31,12 @@ class MyManager(models.Manager):
             return self.model(**kwargs)
 
 
+    def resave_all(self):
+        objs = self.all()
+        for obj in objs:
+            obj.save()
+
+
 class MyUserManager(BaseUserManager, MyManager):
     """
         Custom user model manager where email is the unique identifiers

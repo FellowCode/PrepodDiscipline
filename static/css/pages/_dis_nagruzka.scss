@@ -5,28 +5,38 @@
     td{
       padding-left: 3px !important;
       padding-right: 3px !important;
-    }
 
-    td.error {
-      background-color: #ff7075 !important;
-      color: var(--color) !important;
-    }
+      &.error {
+        background-color: #ff7075 !important;
+        color: var(--color) !important;
+      }
 
-    td input[type=number], input[type=text] {
-      width: 40px !important;
-      padding: 2px !important;
-      text-align: center !important;
+      a.stavka{
+        font-size: 14px;
+      }
 
-      -moz-appearance: none !important;
+      input[type=number], input[type=text] {
+        width: 40px !important;
+        padding: 2px !important;
+        text-align: center !important;
 
-      &::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
-        -webkit-appearance: none !important;
-        margin: 0 !important;
+        -moz-appearance: none !important;
+
+        &::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
+          -webkit-appearance: none !important;
+          margin: 0 !important;
+        }
       }
     }
   }
 
   .panel-buttons{
     margin-top: 20px;
+  }
+    .table-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible !important;
+    font-size: 12px;
   }
 }

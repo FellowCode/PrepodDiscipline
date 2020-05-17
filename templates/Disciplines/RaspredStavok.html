@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load extra %}
+
+{% block title %}Распределение ставок | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container full-width">
+        <div class="child-center">
+            <div class="raspred-stavok cblock">
+                <div class="content">
+                    {% if vne_budget %}
+                        <a href="/disciplines/raspred-stavok/" class="ui primary button large">< Бюджет</a>
+                    {% else %}
+                        <a href="/disciplines/raspred-stavok/?vne_budget=True"  class="ui primary button large">< Внебюджет</a>
+                    {% endif %}
+                    <h1 class="ui center aligned header">Распределение ставок {% if vne_budget %}внебюджет{% else %}бюджет{% endif %}</h1>
+                    <div id="list-container" class="sixteen wide table-container">
+                        <table class="ui sortable selectable celled table">
+                            <thead>
+                            <tr>
+                                <th>ФИО</th>
+                                <th>Должность</th>
+                                <th>Кв.уровень</th>
+                                <th>Сумма</th>
+                                <th>Н.Ставка</th>
+                                <th>Почасовка</th>
+                                <th>Часов ставки</th>
+                                <th>Р.Ставка</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for group in group_nagruzki %}
+                                <tr class="group" style="cursor: pointer">
+                                    <td data-name="prepod__fio" data-label="ФИО">{{ group.prepod__fio }}</td>
+                                    <td data-name="prepod__dolzhnost"
+                                        data-label="Должность">{{ group.prepod__dolzhnost }}</td>
+                                    <td data-name="prepod__kv_uroven"
+                                        data-label="Кв.уровень">{{ group.prepod__kv_uroven }}</td>
+                                    <td data-label="Сумма">{{ group.summary__sum|floatformat }}</td>
+                                    <td data-name="n_stavka"
+                                        data-label="Н.Ставка">{{ group.n_stavka|floatformat:2 }}</td>
+                                    <td data-name="pochasovka" data-label="Почасовка">{{ group.pochasovka|yes_no }}</td>
+                                    <td data-name="prepod__chasov_stavki"
+                                        data-label="Часов ставки">{{ group.prepod__chasov_stavki }}</td>
+                                    <td data-name="r_stavka"
+                                        data-label="Р.Ставка">{{ group.summary__sum|div:group.prepod__chasov_stavki }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui modal tiny">
+        <div class="header">Ставка</div>
+        <div class="content no-shadow">
+            <p id="fio"></p>
+            <p id="r_stavka"></p>
+            <form class="ui form" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="vne_budget" value="{{ vne_budget }}">
+                <input type="hidden" name="prepod__fio">
+                <input type="hidden" name="prepod__dolzhnost">
+                <input type="hidden" name="prepod__kv_uroven">
+                <input type="hidden" name="prepod__chasov_stavki">
+                <input type="hidden" name="n_stavka">
+                <input type="hidden" name="pochasovka">
+                <div class="field">
+                    <label>Н.Ставка</label>
+                    <div class="ui selection dropdown">
+                        <input type="hidden" name="n_stavka_new">
+                        <i class="dropdown icon"></i>
+                        <div class="default text"></div>
+                        <div class="menu">
+                            {% for i in stavka_range %}
+                                <div class="item" data-value="{{ i|floatformat:2 }}">{{ i|floatformat:2 }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="inline field">
+                    <div class="ui checkbox">
+                        <input type="checkbox" tabindex="0" class="hidden" name="pochasovka_new" value="true">
+                        <label>Почасовка</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui approve button primary">Применить</div>
+            <div class="ui cancel button">Отмена</div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        $(document).ready(function () {
+
+            function OnApproveModal() {
+                $modal.find('.approve').addClass('loading');
+                $.post('/disciplines/raspred-stavok/save/', $modal.find('form').serialize(), function () {
+                    {% if vne_budget %}
+                        var url = '/disciplines/raspred-stavok/?vne_budget=True';
+                    {% else %}
+                        var url = '/disciplines/raspred-stavok/';
+                    {% endif %}
+                    $('#list-container').load(url+' table', function () {
+                        $modal.find('.approve').removeClass('loading');
+                        setupRowClick();
+                        $modal.modal('close');
+                    })
+                });
+            }
+            var $modal = $('.ui.modal');
+            setupRowClick();
+
+            function setupRowClick() {
+                $('tr.group').click(function () {
+                    var fio = $(this).find('td[data-name=prepod__fio]').text();
+                    var dolzhnost = $(this).find('td[data-name=prepod__dolzhnost]').text();
+                    var kv_uroven = $(this).find('td[data-name=prepod__kv_uroven]').text();
+                    var chasov_stavki = $(this).find('td[data-name=prepod__chasov_stavki]').text();
+                    var r_stavka = $(this).find('td[data-name=r_stavka]').text();
+                    $modal.find('#fio').text(`${fio}, ${dolzhnost}`);
+                    $modal.find('#r_stavka').text(`Расчетная ставка: ${r_stavka}`);
+                    $modal.find('input[name=prepod__fio]').val(fio);
+                    $modal.find('input[name=prepod__dolzhnost]').val(dolzhnost);
+                    $modal.find('input[name=prepod__kv_uroven]').val(kv_uroven);
+                    $modal.find('input[name=prepod__chasov_stavki]').val(chasov_stavki);
+                    var n_stavka = $(this).find('td[data-name=n_stavka]').text();
+                    $modal.find('input[name=n_stavka]').val(n_stavka);
+                    $modal.find('.dropdown').dropdown('set selected', n_stavka);
+                    var pochasovka = $(this).find('td[data-name=pochasovka]').text() === 'Да';
+                    console.log($(this).find('td[data-name=pochasovka]').text(), pochasovka);
+                    $modal.find('input[name=pochasovka]').val(pochasovka);
+                    var $pochasovka = $modal.find('.ui.checkbox');
+                    if (pochasovka) {
+                        $pochasovka.addClass('checked');
+                        $pochasovka.find('input').attr('checked', 'checked');
+                    } else {
+                        $pochasovka.removeClass('checked');
+                        $pochasovka.find('input').removeAttr('checked');
+                    }
+                    $modal.modal({autofocus: false, onApprove: OnApproveModal}).modal('show');
+                    $pochasovka.checkbox();
+                })
+            }
+        })
+    </script>
+{% endblock %}

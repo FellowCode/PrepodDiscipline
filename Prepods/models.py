@@ -2,7 +2,6 @@ from django.db import models
 from utils.model_manager import MyManager
 from Accounts.models import User
 
-
 class Prepod(models.Model):
     objects = MyManager()
 
@@ -16,6 +15,8 @@ class Prepod(models.Model):
     first_name = models.CharField(max_length=64, verbose_name="Имя")
     surname = models.CharField(max_length=64, verbose_name="Отчество")
 
+    fio = models.CharField(max_length=256, verbose_name='ФИО', blank=True, default='')
+
     dolzhnost = models.CharField(choices=DOLZHNOST, max_length=64, default='Зав. кафедрой')
 
     kafedra = models.ForeignKey('Disciplines.Kafedra', on_delete=models.SET_NULL, null=True, default=None, blank=True)
@@ -27,6 +28,7 @@ class Prepod(models.Model):
     prava = models.CharField(max_length=128, choices=PRAVA, default=None, verbose_name='Права', null=True, blank=True)
 
     def save(self, **kwargs):
+        self.fio = self.get_fio()
         if self.dolzhnost == 'Зав. кафедрой':
             self.prava = 'raspred'
             if self.user:
@@ -47,7 +49,7 @@ class Prepod(models.Model):
     def dolzhnost_name(self):
         return self.dolzhnost
 
-    def fio(self):
+    def get_fio(self):
         return self.__str__()
 
     def __str__(self):

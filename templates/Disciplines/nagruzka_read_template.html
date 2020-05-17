@@ -1,27 +1,8 @@
 <tr>
     <td data-label="Преподаватель">
-        {% if archive or not editable %}
-            {{ nagruzka.prepod.fio }}
-        {% else %}
-        <input type="hidden" name="nagruzka_id" value="{{ nagruzka.id }}">
-        <div class="ui form">
-            <div class="field">
-                <div class="ui selection dropdown preselect"
-                     data-value="{{ nagruzka.prepod.id }}">
-                    <input type="hidden" name="prepod">
-                    <i class="dropdown icon"></i>
-                    <div class="default text">Преподаватель</div>
-                    <div class="menu">
-                        {% for prepod in prepods %}
-                            <div class="item"
-                                 data-value="{{ prepod.id }}">{{ prepod.fio }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+        {{ nagruzka.prepod.fio }}
     </td>
+    <td data-label="Ставка" class="center aligned">{{ nagruzka.n_stavka }}{% if nagruzka.pochasovka %} П{% endif %}</td>
     <td data-label="Студ." class="center aligned">
         {{ nagruzka.student|default:'-' }}
     </td>
@@ -76,6 +57,4 @@
     <td data-label="ИТОГО" class="center aligned">
         {{ nagruzka.summary|default:0 }}
     </td>
-    <td class="center aligned">{% if template %}<a class="delete-btn">Удалить</a>{% endif %}</td>
-
 </tr>
