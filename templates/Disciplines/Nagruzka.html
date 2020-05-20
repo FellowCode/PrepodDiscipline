@@ -114,24 +114,24 @@
                                     {% if not edit and nagruzki|length > 0 %}
                                         <td data-label="Ставка"></td>
                                     {% endif %}
-                                    <td data-label="Студ." class="center aligned">{{ dis.student }}</td>
-                                    <td data-label="ЛК" class="center aligned">{{ dis.lk }}</td>
-                                    <td data-label="ПР" class="center aligned">{{ dis.pr }}</td>
-                                    <td data-label="ЛР" class="center aligned">{{ dis.lr }}</td>
-                                    <td data-label="К.Тек." class="center aligned">{{ dis.k_tek }}</td>
-                                    <td data-label="К.Экз" class="center aligned">{{ dis.k_ekz }}</td>
-                                    <td data-label="Зачет" class="center aligned">{{ dis.zachet }}</td>
-                                    <td data-label="Экз." class="center aligned">{{ dis.ekzamen }}</td>
-                                    <td data-label="Контр.р." class="center aligned">{{ dis.kontr_raboti }}</td>
-                                    <td data-label="КР/КП" class="center aligned">{{ dis.kr_kp }}</td>
-                                    <td data-label="ВКР" class="center aligned">{{ dis.vkr }}</td>
-                                    <td data-label="Пр.Пед." class="center aligned">{{ dis.pr_ped }}</td>
-                                    <td data-label="Пр.Др." class="center aligned">{{ dis.pr_dr }}</td>
-                                    <td data-label="ГАК" class="center aligned">{{ dis.gak }}</td>
-                                    <td data-label="Мг/Асп" class="center aligned">{{ dis.aspirantura }}</td>
-                                    <td data-label="Руков." class="center aligned">{{ dis.rukovodstvo }}</td>
-                                    <td data-label="Доп.ч." class="center aligned">{{ dis.dop_chasi }}</td>
-                                    <td data-label="ИТОГО" class="center aligned">{{ dis.summary }}</td>
+                                    <td data-label="Студ." class="center aligned {% if 'student' in errors %}error{% endif %}">{{ dis.student }}</td>
+                                    <td data-label="ЛК" class="center aligned {% if 'lk' in errors %}error{% endif %}">{{ dis.lk }}</td>
+                                    <td data-label="ПР" class="center aligned {% if 'pr' in errors %}error{% endif %}">{{ dis.pr }}</td>
+                                    <td data-label="ЛР" class="center aligned {% if 'lr' in errors %}error{% endif %}">{{ dis.lr }}</td>
+                                    <td data-label="К.Тек." class="center aligned {% if 'k_tek' in errors %}error{% endif %}">{{ dis.k_tek }}</td>
+                                    <td data-label="К.Экз" class="center aligned {% if 'k_ekz' in errors %}error{% endif %}">{{ dis.k_ekz }}</td>
+                                    <td data-label="Зачет" class="center aligned {% if 'zachet' in errors %}error{% endif %}">{{ dis.zachet }}</td>
+                                    <td data-label="Экз." class="center aligned {% if 'ekzamen' in errors %}error{% endif %}">{{ dis.ekzamen }}</td>
+                                    <td data-label="Контр.р." class="center aligned {% if 'kontr_raboti' in errors %}error{% endif %}">{{ dis.kontr_raboti }}</td>
+                                    <td data-label="КР/КП" class="center aligned {% if 'kr_kp' in errors %}error{% endif %}">{{ dis.kr_kp }}</td>
+                                    <td data-label="ВКР" class="center aligned {% if 'vkr' in errors %}error{% endif %}">{{ dis.vkr }}</td>
+                                    <td data-label="Пр.Пед." class="center aligned {% if 'pr_ped' in errors %}error{% endif %}">{{ dis.pr_ped }}</td>
+                                    <td data-label="Пр.Др." class="center aligned {% if 'pr_dr' in errors %}error{% endif %}">{{ dis.pr_dr }}</td>
+                                    <td data-label="ГАК" class="center aligned {% if 'gak' in errors %}error{% endif %}">{{ dis.gak }}</td>
+                                    <td data-label="Мг/Асп" class="center aligned {% if 'aspirantura' in errors %}error{% endif %}">{{ dis.aspirantura }}</td>
+                                    <td data-label="Руков." class="center aligned {% if 'rukovodstvo' in errors %}error{% endif %}">{{ dis.rukovodstvo }}</td>
+                                    <td data-label="Доп.ч." class="center aligned {% if 'dop_chasi' in errors %}error{% endif %}">{{ dis.dop_chasi }}</td>
+                                    <td data-label="ИТОГО" class="center aligned {% if 'summary' in errors %}error{% endif %}">{{ dis.summary }}</td>
 
                                 </tr>
                                 </tbody>

@@ -8,7 +8,8 @@
         <div class="child-center">
             <div class="discipline-list cblock">
                 <div class="content">
-                    <h1 class="ui center aligned header">Список дисциплин {% if prepod %}{{ prepod.fio }}{% endif %}</h1>
+                    <h1 class="ui center aligned header">Список дисциплин
+                        {% if prepod %}{{ prepod.fio }}{% endif %}</h1>
                     <div class="panel">
                         <div class="buttons left">
                             <div class="ui form">
@@ -24,23 +25,25 @@
                             </div>
                         </div>
                         {% if request.user.is_superuser %}
-                        <div class="buttons right">
-                            <form id="download-xls" method="post">
-                                {% csrf_token %}
-                                <div class="sixteen wide">
+                            <div class="buttons right">
+                                <form id="download-xls" method="post">
+                                    {% csrf_token %}
+                                    <div class="sixteen wide">
                                         <a onclick="showModal()" class="large ui primary button">Залить xls</a>
-                                    <button type="submit" class="large ui primary button">Скачать xls</button>
-                                    <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
-                                       download="proposed_file_name">Скачать шаблон</a>
-                                </div>
-                            </form>
-                        </div>
+                                        <button type="submit" class="large ui primary button">Скачать xls</button>
+                                        <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
+                                           download="proposed_file_name">Скачать шаблон</a>
+                                    </div>
+                                </form>
+                            </div>
                         {% endif %}
                     </div>
                     <div class="sixteen wide table-container">
-                        <table class="ui sortable celled table">
+                        <table class="ui sortable celled table tableFixHead">
                             <thead>
                             <tr>
+                                <th>#</th>
+                                <th>Код</th>
                                 <th>Форма</th>
                                 <th>Дисциплина</th>
                                 <th>Факультет</th>
@@ -48,21 +51,36 @@
                                 <th>Курс</th>
                                 <th>Сем.</th>
                                 <th>Период</th>
+                                <th>Недель</th>
                                 <th>Труд.</th>
-                                <th>Часов в нед.</th>
-                                <th>Часов СРС</th>
-                                <th>Часов по плану</th>
+                                <th>В нед.</th>
+                                <th>СРС</th>
+                                <th>По плану</th>
+                                <th>Студ.</th>
+                                <th>Групп</th>
+                                <th>Подгр.</th>
                                 <th>ЛК</th>
                                 <th>ПР</th>
                                 <th>ЛР</th>
                                 <th>Зачет</th>
                                 <th>Экзамен</th>
+                                <th>Контр.р.</th>
+                                <th>КР/КП</th>
+                                <th>ВКР</th>
+                                <th>Пр.пед.</th>
+                                <th>Пр.др.</th>
+                                <th>ГАК</th>
+                                <th>Асп./Маг.</th>
+                                <th>Рук.</th>
+                                <th>Доп.ч.</th>
                                 <th>ВСЕГО</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% for dis in disciplines %}
-                                <tr>
+                                <tr class="{% if dis.nagruzka_count == 0 %} nagruzka-empty {% elif dis.errors %} nagruzka-error {% endif %}">
+                                    <td data-label="#">{{ forloop.counter }}</td>
+                                    <td data-label="Код">{{ dis.code|floatformat }}</td>
                                     <td data-label="Форма">{{ dis.form.name }}</td>
                                     <td data-label="Дисциплина"><a
                                             href="/disciplines/{{ dis.id }}/nagruzka/">{{ dis.name }}</a>
@@ -72,15 +90,28 @@
                                     <td data-label="Курс">{{ dis.kurs }}</td>
                                     <td data-label="Сем.">{{ dis.semestr }}</td>
                                     <td data-label="Период">{{ dis.period }}</td>
+                                    <td data-label="Недель">{{ dis.nedeli }}</td>
                                     <td data-label="Труд.">{{ dis.trudoemkost }}</td>
-                                    <td data-label="Часов в нед.">{{ dis.chas_v_nedelu }}</td>
-                                    <td data-label="Часов СРС">{{ dis.srs }}</td>
-                                    <td data-label="Часов по плану">{{ dis.chas_po_planu }}</td>
+                                    <td data-label="В нед.">{{ dis.chas_v_nedelu }}</td>
+                                    <td data-label="СРС">{{ dis.srs }}</td>
+                                    <td data-label="По плану">{{ dis.chas_po_planu }}</td>
+                                    <td data-label="Студ.">{{ dis.student }}</td>
+                                    <td data-label="Групп">{{ dis.group }}</td>
+                                    <td data-label="Подгр.">{{ dis.podgroup }}</td>
                                     <td data-label="ЛК">{{ dis.lk }}</td>
                                     <td data-label="ПР">{{ dis.pr }}</td>
                                     <td data-label="ЛР">{{ dis.lr }}</td>
                                     <td data-label="Зачет">{{ dis.zachet }}</td>
                                     <td data-label="Экзамен">{{ dis.ekzamen }}</td>
+                                    <td data-label="Контр.р.">{{ dis.kontr_raboti }}</td>
+                                    <td data-label="КР/КП">{{ dis.kr_kp }}</td>
+                                    <td data-label="ВКР">{{ dis.vkr }}</td>
+                                    <td data-label="Пр.пед.">{{ dis.pr_ped }}</td>
+                                    <td data-label="Пр.др.">{{ dis.pr_dr }}</td>
+                                    <td data-label="ГАК">{{ dis.gak }}</td>
+                                    <td data-label="Асп./Маг.">{{ dis.aspirantura }}</td>
+                                    <td data-label="Рук.">{{ dis.rukovodstvo }}</td>
+                                    <td data-label="Доп.ч.">{{ dis.dop_chasi }}</td>
                                     <td data-label="ВСЕГО">{{ dis.summary }}</td>
                                 </tr>
                             {% endfor %}
@@ -97,7 +128,7 @@
             <div class="ui text loader">Отправка файла...</div>
         </div>
         <div class="content no-shadow">
-            <form id="disciplines-form" enctype="multipart/form-data" method="post" class="ui form">
+            <form id="disciplines-form" enctype="multipart/form-data" method="post" class="ui form error">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="update">
                 <input id="disciplines-path" type="text" name="filename" readonly>
@@ -107,6 +138,9 @@
                     <i class="ui upload icon"></i>
                     Выбрать
                 </label>
+                <div class="ui error message hide">
+                    <div class="header">Ошибка отправки</div>
+                </div>
             </form>
         </div>
         <div class="actions">
@@ -148,11 +182,12 @@
                 success: function (data) {
                     console.log(data);
                     $loader.removeClass('active');
+                    $('.ui.modal form .error.message').addClass('hide')
                     window.location.reload();
                 },
                 error: function (data) {
                     $loader.removeClass('active');
-                    window.location.reload();
+                    $('.ui.modal form .error.message').removeClass('hide')
                 }
             })
         }

@@ -9,6 +9,9 @@ CELL_NAMES = ['code', 'form', 'shifr', 'name', 'fakultet', 'specialnost', 'kurs'
               'trudoemkost', 'chas_v_nedelu', 'srs', 'chas_po_planu', 'student', 'group', 'podgroup', 'lk', 'pr',
               'lr', 'k_tek', 'k_ekz', 'zachet', 'ekzamen', 'kontr_raboti', 'kr_kp', 'vkr', 'pr_ped', 'pr_dr', 'gak',
               'aspirantura', 'rukovodstvo', 'dop_chasi', 'summary', 'kafedra', 'potok']
+
+
+
 FK = {'form': DisciplineForm, 'fakultet': Fakultet, 'specialnost': Specialnost, 'kafedra': Kafedra, 'potok': Potok}
 
 def _getOutCell(outSheet, colIndex, rowIndex):
@@ -43,23 +46,33 @@ def handle_upload_disciplines(f, action):
         for chunk in f.chunks():
             destination.write(chunk)
 
-    rb = xlrd.open_workbook(filename)
+    rb = xlrd.open_workbook(filename, encoding_override="cp1251")
     if action == 'replace':
-        Discipline.objects.all().delete()
         sheet = rb.sheet_by_index(0)
-        for rownum in range(1, sheet.nrows-1):
-            d = Discipline()
+        new_disciplines_id = []
+
+        for rownum in range(1, sheet.nrows):
+            if sheet.row_values(rownum)[0] == '':
+                break
+            d = Discipline.objects.get_or_new(code=sheet.row_values(rownum)[0])
             for i, val in enumerate(sheet.row_values(rownum)):
                 if i < len(CELL_NAMES):
-                    if CELL_NAMES[i] == 'summary':
-                        continue
                     if CELL_NAMES[i] in FK:
                         related = FK[CELL_NAMES[i]].objects.get_or_new(name=val)
                         related.save()
                         setattr(d, CELL_NAMES[i], related)
                     else:
+                        try:
+                            val = float(val)
+                        except:
+                            pass
                         d.__dict__[CELL_NAMES[i]] = val
+            d.check_nagruzka_sum()
             d.save()
+            new_disciplines_id.append(d.id)
+
+        old_disciplines = Discipline.objects.exclude(id__in=new_disciplines_id).all()
+        old_disciplines.delete()
 
 
 def create_disciplines_xls():

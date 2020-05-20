@@ -53,6 +53,7 @@ def disciplines_download(request):
 
 def discipline_nagruzka(request, dis_id):
     dis = Discipline.objects.get_or_404(id=dis_id)
+    dis.check_nagruzka_sum()
     prepods = Prepod.objects.all()
     nagruzki = Nagruzka.objects.filter(discipline=dis, archive=None).all()
     archives = Archive.objects.filter(discipline=dis).all()
@@ -61,7 +62,7 @@ def discipline_nagruzka(request, dis_id):
 
     return render(request, 'Disciplines/Nagruzka.html',
                   {'dis': dis, 'prepods': prepods, 'nagruzki': nagruzki, 'editable': editable, 'archives': archives,
-                   'edit': request.GET.get('edit'), 'stavka_range': stavka_range()})
+                   'edit': request.GET.get('edit'), 'stavka_range': stavka_range(), 'errors': dis.check_nagruzka_sum()})
 
 
 def stavka_range():
@@ -94,15 +95,14 @@ def save_nagruzka(request, dis_id):
                 nagruzka[cell_name] = Prepod.objects.get(id=nagruzka[cell_name])
             if cell_name == 'pochasovka':
                 nagruzka[cell_name] = nagruzka[cell_name].lower() == 'true'
-        print(nagruzka)
         Nagruzka(**nagruzka).save()
         i += 1
+    dis.check_nagruzka_sum()
+    dis.save()
     return JsonResponse({'status': 'OK'})
 
 
 def edit_nagruzka(request, dis_id):
-    if not request.user.is_superuser:
-        raise Http404
     dis = Discipline.objects.get_or_404(id=dis_id)
     nagruzka_ids = request.POST.getlist('nagruzka_id')
     prepod_ids = request.POST.getlist('prepod')
@@ -124,10 +124,8 @@ def edit_nagruzka(request, dis_id):
 
 
 def archiving(request, dis_id):
-    if not request.user.is_superuser:
-        raise Http404
-
     dis = Discipline.objects.get_or_404(id=dis_id)
+
     nagruzki = Nagruzka.objects.filter(discipline=dis, archive=None).all()
 
     archive = Archive(discipline=dis)
@@ -135,6 +133,9 @@ def archiving(request, dis_id):
 
     nagruzki.update(archive=archive)
     Nagruzka.objects.bulk_update(nagruzki, ['archive'])
+
+    dis.check_nagruzka_sum()
+    dis.save()
 
     return redirect(f'/disciplines/{dis.id}/nagruzka/')
 

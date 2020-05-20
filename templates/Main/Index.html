@@ -32,7 +32,7 @@
                             </a>
                         </div>
                         <div class="sixteen wide">
-                            <a href="{% url 'disciplines:raspred_stavok' %}" class="search-papers massive ui primary button">
+                            <a href="{% url 'disciplines:raspred_stavok' %}" class="search-papers massive ui primary button {% if dis_errors %}disabled{% endif %}">
                                 Распределение ставок
                             </a>
                         </div>
