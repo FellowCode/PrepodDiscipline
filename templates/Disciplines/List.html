@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load modified %}
 
 {% block title %}Список дисциплин | ПГУ им. "Шолом-Алейхема"{% endblock %}
 
@@ -29,14 +30,27 @@
                                 <form id="download-xls" method="post">
                                     {% csrf_token %}
                                     <div class="sixteen wide">
-                                        <a onclick="showModal()" class="large ui primary button">Залить xls</a>
-                                        <button type="submit" class="large ui primary button">Скачать xls</button>
+                                        <a id="btn-upload-modal" onclick="showModal()"
+                                           class="large ui primary button {% if parsing %} disabled {% endif %}">Залить
+                                            xls</a>
+                                        <button id="btn-download-xls" type="submit"
+                                                class="large ui primary button {% if parsing %} disabled {% endif %}">
+                                            Скачать xls
+                                        </button>
                                         <a href="{% static 'files/Shablon.xls' %}" class="large ui primary button"
                                            download="proposed_file_name">Скачать шаблон</a>
                                     </div>
                                 </form>
                             </div>
                         {% endif %}
+                    </div>
+                    <div id="parse-progress-block" class="panel {% if not parsing %}hide{% endif %}">
+                        <div id="parse-progress" class="ui blue progress">
+                            <div class="bar">
+                                <div class="progress"></div>
+                            </div>
+                            <div class="label">Обработка файла</div>
+                        </div>
                     </div>
                     <div class="sixteen wide table-container">
                         <table class="ui sortable celled table tableFixHead">
@@ -74,12 +88,14 @@
                                 <th>Рук.</th>
                                 <th>Доп.ч.</th>
                                 <th>ВСЕГО</th>
+                                <th>Кафедра</th>
+                                <th>Поток</th>
                             </tr>
                             </thead>
                             <tbody>
                             {% for dis in disciplines %}
                                 <tr class="{% if dis.nagruzka_count == 0 %} nagruzka-empty {% elif dis.errors %} nagruzka-error {% endif %}">
-                                    <td data-label="#">{{ forloop.counter }}</td>
+                                    <td data-label="#">{{ forloop.counter|add:offset }}</td>
                                     <td data-label="Код">{{ dis.code|floatformat }}</td>
                                     <td data-label="Форма">{{ dis.form.name }}</td>
                                     <td data-label="Дисциплина"><a
@@ -113,10 +129,22 @@
                                     <td data-label="Рук.">{{ dis.rukovodstvo }}</td>
                                     <td data-label="Доп.ч.">{{ dis.dop_chasi }}</td>
                                     <td data-label="ВСЕГО">{{ dis.summary }}</td>
+                                    <td data-label="Кафедра">{{ dis.kafedra.name }}</td>
+                                    <td data-label="Поток" style="white-space: nowrap">{{ dis.potok.name }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                    <div class="child-center">
+                        <div class="ui pagination menu">
+                            {% for p in pages %}
+                                <a href="/disciplines/list/?page={{ p|add:1 }}"
+                                   class="{% if p|add:1 == page %} active {% endif %} item">
+                                    {{ p|add:1 }}
+                                </a>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -170,6 +198,8 @@
             sendDisciplines($loader);
         }
 
+        var check_prog_interval
+
         function sendDisciplines($loader) {
             var formData = new FormData($('#disciplines-form').get(0));
             $.ajax({
@@ -183,11 +213,36 @@
                     console.log(data);
                     $loader.removeClass('active');
                     $('.ui.modal form .error.message').addClass('hide')
-                    window.location.reload();
+                    $parse_prog_block.removeClass('hide')
+                    $parse_progress.progress({percent: 0})
+                    check_prog_interval = setInterval(checkParseProgress, 1000)
+                    $('.ui.modal').modal('hide')
+                    $('#btn-upload-modal').addClass('disabled')
+                    $('#btn-download-xls').addClass('disabled')
+
                 },
                 error: function (data) {
                     $loader.removeClass('active');
                     $('.ui.modal form .error.message').removeClass('hide')
+                }
+            })
+        }
+        {% if parsing %}
+            check_prog_interval = setInterval(checkParseProgress, 1000)
+        {% endif %}
+        var $parse_progress = $('#parse-progress')
+        var $parse_prog_block = $('#parse-progress-block')
+
+        function checkParseProgress() {
+            $.get('{% url 'disciplines:parse_progress' %}', function (data) {
+                console.log(data['status'])
+                if (!data['status']) {
+                    $parse_prog_block.addClass('hide')
+                    clearInterval(check_prog_interval)
+                    window.location.reload()
+                } else {
+                    var percent = parseInt(data['progress'].split(' ')[1])
+                    $parse_progress.progress({percent: percent})
                 }
             })
         }

@@ -4,6 +4,7 @@ from .models import Discipline, Nagruzka, Archive
 from Prepods.models import Prepod
 
 from utils.xls import handle_upload_disciplines, create_disciplines_xls
+from utils import xls
 
 
 def disciplines_list(request):
@@ -34,7 +35,14 @@ def disciplines_list(request):
             disciplines = get_prepod_disciplines(prepod)
     else:
         raise Http404
-    return render(request, 'Disciplines/List.html', {'disciplines': disciplines, 'prepod': prepod})
+    PER_PAGE = 300
+    page = int(request.GET.get('page', '1'))
+    pages = disciplines.count() // PER_PAGE
+    disciplines = disciplines[PER_PAGE*(page-1):PER_PAGE*(page)]
+
+    return render(request, 'Disciplines/List.html',
+                  {'disciplines': disciplines, 'prepod': prepod,
+                   'parse_progress': xls.upload_progress, 'parsing': xls.parsing, 'page': page, 'pages': range(pages+1), 'offset': PER_PAGE*(page-1)})
 
 
 def disciplines_upload(request):
@@ -42,6 +50,11 @@ def disciplines_upload(request):
         handle_upload_disciplines(request.FILES['disciplines'], request.POST.get('action'))
         return JsonResponse({'status': 'OK'})
     raise Http404
+
+
+def parse_progress(request):
+    if request.is_ajax():
+        return JsonResponse({'status': xls.parsing, 'progress': xls.upload_progress})
 
 
 def disciplines_download(request):
@@ -70,7 +83,6 @@ def stavka_range():
 
 
 def save_nagruzka(request, dis_id):
-
     dis = Discipline.objects.get_or_404(id=dis_id)
 
     CELL_NAMES = ['prepod', 'n_stavka', 'pochasovka', 'student', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet',

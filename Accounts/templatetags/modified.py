@@ -73,3 +73,8 @@ def get_value_from_context(context, dots_var, nullable=False):
         value = value()
 
     return value
+
+
+@register.filter
+def multiply(val1, val2):
+    return int(val1)*int(val2)

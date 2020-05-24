@@ -73,7 +73,7 @@ class Discipline(models.Model):
 
     errors = models.BooleanField(default=True, verbose_name='Ошибки')
 
-    code = models.CharField(max_length=16, verbose_name='Код')
+    code = models.IntegerField(verbose_name='Код', default=0)
     form = models.ForeignKey(DisciplineForm, on_delete=models.SET_NULL, null=True, verbose_name='Форма')
 
     shifr = models.CharField(max_length=10, default='НЕТ', verbose_name='Шифр')
@@ -178,7 +178,7 @@ class Discipline(models.Model):
     class Meta:
         verbose_name = 'Дисциплина'
         verbose_name_plural = 'Дисциплины'
-        ordering = ['name']
+        ordering = ['code']
 
 
 class Archive(models.Model):
