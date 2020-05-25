@@ -2,8 +2,6 @@ from django.shortcuts import render
 from Disciplines.models import Discipline
 
 
-
-
 def index(request):
     if request.user.is_superuser:
         dis_errors = len(Discipline.objects.filter(errors=True).all()) > 0
