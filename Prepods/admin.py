@@ -7,6 +7,7 @@ from .models import *
 @admin.register(Prepod)
 class PrepodAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'dolzhnost', 'kv_uroven', 'chasov_stavki']
+    fields = ['user', 'last_name', 'first_name', 'surname', 'dolzhnost', 'kafedra', 'kv_uroven', 'chasov_stavki', 'prava']
 
     def has_delete_permission(self, request, obj=None):
 

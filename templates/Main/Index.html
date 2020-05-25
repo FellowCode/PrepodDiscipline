@@ -25,7 +25,7 @@
                                 <i class="user plus right icon"></i>
                             </a>
                         </div>
-                    {% elif request.user.is_superuser or request.user.prepod.dolzhnost == 'Зав. кафедрой' %}
+                    {% elif request.user.is_superuser or request.user.prepod.dolzhnost == 'Зав. кафедрой' or user.prepod.prava == 'raspred' %}
                         <div class="sixteen wide">
                             <a href="{% url 'disciplines:list' %}" class="search-papers massive ui primary button">
                                 Текущее распределение
@@ -36,11 +36,13 @@
                                 Распределение ставок
                             </a>
                         </div>
+                        {% if request.user.is_superuser or request.user.prepod.dolzhnost == 'Зав. кафедрой' %}
                         <div class="sixteen wide">
                             <a href="{% url 'prepods:list' %}" class="search-papers massive ui primary button">
                                 Преподаватели
                             </a>
                         </div>
+                        {% endif %}
                     {% elif user.prepod %}
                         <div class="sixteen wide">
                             <a href="{% url 'disciplines:list' %}" class="search-papers massive ui primary button">

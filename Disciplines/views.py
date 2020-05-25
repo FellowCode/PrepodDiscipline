@@ -26,7 +26,7 @@ def disciplines_list(request):
         else:
             disciplines = Discipline.objects.all()
         if not request.user.is_superuser:
-            disciplines.filter(kafedra=request.user.prepod.kafedra).all()
+            disciplines = disciplines.filter(kafedra=request.user.prepod.kafedra).all()
     elif request.user.prepod:
         prepod = request.user.prepod
         if request.user.prepod.prava == 'prosmotr':
@@ -38,11 +38,12 @@ def disciplines_list(request):
     PER_PAGE = 300
     page = int(request.GET.get('page', '1'))
     pages = disciplines.count() // PER_PAGE
-    disciplines = disciplines[PER_PAGE*(page-1):PER_PAGE*(page)]
+    disciplines = disciplines[PER_PAGE * (page - 1):PER_PAGE * (page)]
 
     return render(request, 'Disciplines/List.html',
                   {'disciplines': disciplines, 'prepod': prepod,
-                   'parse_progress': xls.upload_progress, 'parsing': xls.parsing, 'page': page, 'pages': range(pages+1), 'offset': PER_PAGE*(page-1)})
+                   'parse_progress': xls.upload_progress, 'parsing': xls.parsing, 'page': page,
+                   'pages': range(pages + 1), 'offset': PER_PAGE * (page - 1)})
 
 
 def disciplines_upload(request):
@@ -75,7 +76,8 @@ def discipline_nagruzka(request, dis_id):
 
     return render(request, 'Disciplines/Nagruzka.html',
                   {'dis': dis, 'prepods': prepods, 'nagruzki': nagruzki, 'editable': editable, 'archives': archives,
-                   'edit': request.GET.get('edit'), 'stavka_range': stavka_range(), 'errors': dis.check_nagruzka_sum()})
+                   'edit': request.GET.get('edit'), 'stavka_range': stavka_range(), 'errors': dis.check_nagruzka_sum(),
+                   'source_page': request.GET.get('source_page', 1)})
 
 
 def stavka_range():
@@ -149,7 +151,7 @@ def archiving(request, dis_id):
     dis.check_nagruzka_sum()
     dis.save()
 
-    return redirect(f'/disciplines/{dis.id}/nagruzka/')
+    return redirect(f"/disciplines/{dis.id}/nagruzka/?source_page={request.GET.get('source_page', 1)}")
 
 
 from django.db.models import Sum
@@ -158,9 +160,11 @@ from django.db.models import Sum
 def raspred_stavok(request):
     vne_budget = request.GET.get('vne_budget')
     if vne_budget:
-        nagruzki = Nagruzka.objects.filter(archive=None, discipline__form__name__contains='_В').all()
+        nagruzki = Nagruzka.objects.filter(archive=None, discipline__form__name__contains='_В')
     else:
         nagruzki = Nagruzka.objects.filter(archive=None).exclude(discipline__form__name__contains='_В').all()
+    if not request.user.is_superuser:
+        nagruzki = nagruzki.filter(discipline__kafedra=request.user.prepod.kafedra)
     group_nagruzki = nagruzki.values('prepod__fio', 'prepod__dolzhnost',
                                      'prepod__kv_uroven', 'n_stavka', 'pochasovka',
                                      'prepod__chasov_stavki').order_by('prepod__fio').annotate(Sum('summary'))
@@ -184,6 +188,8 @@ def raspred_stavok_save(request):
         nagruzki = Nagruzka.objects.filter(archive=None, discipline__form__name__contains='_В').all()
     else:
         nagruzki = Nagruzka.objects.filter(archive=None).exclude(discipline__form__name__contains='_В').all()
+    if not request.user.is_superuser:
+        nagruzki = nagruzki.filter(discipline__kafedra=request.user.prepod.kafedra)
     nagruzki.filter(**filter).update(**update)
 
     return redirect(reverse('disciplines:raspred_stavok'))

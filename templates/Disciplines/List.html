@@ -99,7 +99,7 @@
                                     <td data-label="Код">{{ dis.code|floatformat }}</td>
                                     <td data-label="Форма">{{ dis.form.name }}</td>
                                     <td data-label="Дисциплина"><a
-                                            href="/disciplines/{{ dis.id }}/nagruzka/">{{ dis.name }}</a>
+                                            href="/disciplines/{{ dis.id }}/nagruzka/?source_page={{ page }}">{{ dis.name }}</a>
                                     </td>
                                     <td data-label="Факультет">{{ dis.fakultet.name }}</td>
                                     <td data-label="Спец.">{{ dis.specialnost.name }}</td>
@@ -239,7 +239,6 @@
                 if (!data['status']) {
                     $parse_prog_block.addClass('hide')
                     clearInterval(check_prog_interval)
-                    window.location.reload()
                 } else {
                     var percent = parseInt(data['progress'].split(' ')[1])
                     $parse_progress.progress({percent: percent})

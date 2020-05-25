@@ -1,12 +1,30 @@
 from django.contrib import admin
-
+from django.contrib.auth.admin import UserAdmin
 from Accounts.models import User
 from django.contrib.auth.models import Group
+from .forms import *
 
 admin.site.unregister(Group)
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(UserAdmin):
+    add_form = CustomUserCreationForm
+    form = CustomUserChangeForm
+    model = User
+
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2', 'is_staff', 'is_active')}
+        ),
+    )
+    search_fields = ('email',)
+    ordering = ('email',)
+
     def create_date(self, obj):
         return obj.date_joined.strftime("%d.%m.%Y")
 

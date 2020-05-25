@@ -9,7 +9,7 @@
         <div class="child-center">
             <div class="discipline-list cblock">
                 <div class="content">
-                    <a href="{% url 'disciplines:list' %}">< Все дисциплины</a>
+                    <a href="/disciplines/list/?page={{ source_page }}">< Все дисциплины</a>
                     <h1 class="ui center aligned header">Нагрузка дисциплины</h1>
                     <div class="sixteen wide table-container">
                         <table class="ui sortable celled table">
@@ -156,7 +156,7 @@
                                     <a href="/disciplines/{{ dis.id }}/nagruzka/"
                                        class="ui button large primary">Отмена</a>
                                 {% else %}
-                                    <a href="/disciplines/{{ dis.id }}/nagruzka/archiving/"
+                                    <a href="/disciplines/{{ dis.id }}/nagruzka/archiving/?source_page={{ source_page }}"
                                        class="ui button large primary">Новое
                                         распределение</a>
                                     <a href="?edit=True" class="ui button large primary">Редактировать</a>
@@ -343,7 +343,7 @@
                 var url = '/disciplines/{{ dis.id }}/nagruzka/save/';
                 $.post(url, $(this).serialize(), function (data) {
                     $btn.removeClass('loading');
-                    window.location = '/disciplines/{{ dis.id }}/nagruzka/';
+                    window.location.reload()
                 });
                 $template_inputs.removeAttr('disabled');
             });
