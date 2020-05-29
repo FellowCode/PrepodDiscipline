@@ -1,10 +1,13 @@
 import urllib
+from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
+from django.core import signing
 from django.http import Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
+from mail.smtp import SendRestoreMail
 from .forms import *
 from django.contrib import auth
 from django.conf import settings
@@ -68,3 +71,42 @@ def change_password(request):
         auth.login(request, request.user)
         return redirect(reverse('accounts:personal_area'))
     return render(request, 'Accounts/ChangePassword.html', {'form': form})
+
+
+def restore_password(request):
+    if request.method == 'POST':
+        form = RestorePasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            user = form.cleaned_data['user']
+            SendRestoreMail(user)
+            return render(request, 'Accounts/RestoreEmailSend.html', {'email': email})
+        return render(request, 'Accounts/RestorePassword.html', {'form': form})
+    form = RestorePasswordForm()
+    return render(request, 'Accounts/RestorePassword.html', {'form': form})
+
+
+def set_new_password(request, signed_pk):
+    try:
+        pk = signing.loads(signed_pk, max_age=timedelta(minutes=15))
+    except:
+        raise Http404
+
+    user = User.objects.get_or_404(pk=pk)
+
+    if request.method == 'POST':
+        form = SetNewPasswordForm(request.POST)
+        if form.is_valid():
+            user.set_password(form.cleaned_data['spassword'])
+            user.save()
+            user_auth = authenticate(username=user.email,
+                                     password=form.cleaned_data['spassword'])
+            auth.login(request, user_auth)
+            return redirect('accounts:personal_area')
+        return render(request, 'Accounts/SetNewPassword.html', {'form': form})
+    form = SetNewPasswordForm()
+    return render(request, 'Accounts/SetNewPassword.html', {'form': form})
+
+
+def personal_area(request):
+    return render(request, 'Accounts/PersonalArea.html')

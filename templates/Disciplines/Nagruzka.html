@@ -343,7 +343,11 @@
                 var url = '/disciplines/{{ dis.id }}/nagruzka/save/';
                 $.post(url, $(this).serialize(), function (data) {
                     $btn.removeClass('loading');
-                    window.location.reload()
+                    {% if source_page %}
+                        window.location.href = '/disciplines/{{ dis.id }}/nagruzka/?source_page={{ source_page }}'
+                    {% else %}
+                        window.location.href = '/disciplines/{{ dis.id }}/nagruzka/'
+                    {% endif %}
                 });
                 $template_inputs.removeAttr('disabled');
             });

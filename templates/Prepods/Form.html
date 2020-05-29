@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load extra %}
+
+{% block title %}Распределение ставок | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container full-width">
+        <div class="child-center">
+            <div class="prepod-form cblock">
+                <div class="content">
+                    <div class="ui breadcrumb">
+                        <a href="{% url 'prepods:list' %}" class="section">Преподаватели</a>
+                    </div>
+                    <h1 class="header ui center aligned">Преподаватель</h1>
+                    <form class="ui form error" method="post">
+                        {% csrf_token %}
+                        {% if form.errors.items|length > 0 %}
+                            <div class="ui error message">
+                                <div class="header">Исправьте ошибки</div>
+                                <ul class="list">
+                                {% for key, error in form.errors.items %}
+                                    <li><strong>{{ form.fields|get_label:key }}</strong>: {{ error.0 }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        <div class="field">
+                            <label>Пользователь</label>
+                            <select id="user-dropdown" name="user" class="ui search dropdown clearable" data-preselect="{{ form.user.value|default_if_none:'' }}">
+                                    <option class="item" value="">Не назначен</option>
+                                    {% for user in users %}
+                                        <option value="{{ user.id }}">{{ user.email }}</option>
+                                    {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Фамилия</label>
+                            <input type="text" name="last_name" value="{{ form.last_name.value|default_if_none:'' }}"
+                                   placeholder="">
+                        </div>
+                        <div class="field">
+                            <label>Имя</label>
+                            <input type="text" name="first_name" value="{{ form.first_name.value|default_if_none:'' }}"
+                                   placeholder="">
+                        </div>
+                        <div class="field">
+                            <label>Отчество</label>
+                            <input type="text" name="surname" value="{{ form.surname.value|default_if_none:'' }}"
+                                   placeholder="">
+                        </div>
+                        {% if user.is_superuser %}
+                            <div class="field">
+                                <label>Кафедра</label>
+                                <div class="ui selection dropdown"
+                                     data-preselect="{{ form.kafedra.value|default_if_none:'' }}">
+                                    <input type="hidden" name="kafedra">
+                                    <i class="dropdown icon"></i>
+                                    <div class="default text">Кафедра</div>
+                                    <div class="menu">
+                                        {% for kafedra in kafedri %}
+                                            <div class="item" data-value="{{ kafedra.id }}">{{ kafedra.name }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="field">
+                            <label>Должность</label>
+                            <div id="dolzhnost-dropdown" class="ui selection dropdown"
+                                 data-preselect="{{ form.dolzhnost.value|default_if_none:'' }}">
+                                <input type="hidden" name="dolzhnost">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Должность</div>
+                                <div class="menu">
+                                    {% for value, text in form.dolzhnost.field.choices %}
+                                        <div class="item" data-value="{{ value }}">{{ text }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="two fields">
+                            <div class="field">
+                                <label>Квалификационный уровень</label>
+                                <input type="number" name="kv_uroven"
+                                       value="{{ form.kv_uroven.value|default_if_none:'' }}"
+                                       placeholder="">
+                            </div>
+                            <div class="field">
+                                <label>Часов ставки</label>
+                                <input type="number" name="chasov_stavki"
+                                       value="{{ form.chasov_stavki.value|default_if_none:'' }}"
+                                       placeholder="">
+                            </div>
+                        </div>
+                        <div id="prava-field" class="field hide">
+                            <label>Права</label>
+                            <div class="ui selection dropdown"
+                                 data-preselect="{{ form.prava.value }}">
+                                <input type="hidden" name="prava">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Права</div>
+                                <div class="menu">
+                                    {% for value, text in form.prava.field.choices %}
+                                        <div class="item" data-value="{{ value }}">{{ text }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="child-center">
+                            <button class="button ui primary">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        $(document).ready(function () {
+            $('.ui.dropdown').each(function (i) {
+                var value  = $(this).attr('data-preselect')
+                if ($(this).hasClass('clearable'))
+                    $(this).dropdown({clearable: true})
+                $(this).dropdown('set selected', value)
+                if ($(this).attr('id') === 'dolzhnost-dropdown' && value !== 'Зав. кафедрой'){
+                    $('#prava-field').removeClass('hide')
+                }
+            })
+            $('#dolzhnost-dropdown').dropdown('setting', 'onChange', function (value, text, $choice) {
+                if (text === 'Зав. кафедрой'){
+                    $('#prava-field').addClass('hide')
+                } else {
+                    $('#prava-field').removeClass('hide')
+                }
+            })
+        })
+    </script>
+{% endblock %}

@@ -15,7 +15,7 @@
                         <form id="download-xls" method="post">
                             {% csrf_token %}
                             <div class="sixteen wide">
-                                <a href="/admin/Prepods/prepod/add/" class="large ui primary button">Добавить</a>
+                                <a href="{% url 'prepods:prepod_form' %}" class="large ui primary button">Добавить</a>
                             </div>
                         </form>
                     </div>
@@ -38,7 +38,7 @@
                             {% for prepod in prepods %}
                                 <tr>
                                     <td data-label="ФИО"><a
-                                            href="/admin/Prepods/prepod/{{ prepod.id }}/change/">{{ prepod.fio }}</a>
+                                            href="{% iurl 'prepods:prepod_form_id' id='prepod.id' %}">{{ prepod.fio }}</a>
                                     </td>
                                     <td data-label="Пользователь">{{ prepod.user.email|default_if_none:"-" }}</td>
                                     <td data-label="Кафедра">{{ prepod.kafedra.name }}</td>

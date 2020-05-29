@@ -16,3 +16,7 @@ def yes_no(val):
 def div(val1, val2):
     return round(val1/val2, 2)
 
+
+@register.filter
+def get_label(a_dict, key):
+    return getattr(a_dict.get(key), 'label', 'No label')

@@ -16,19 +16,6 @@
                         <p>Часов ставки: {{ prepod.chasov_stavki }}; Н.Ставка: {{ prepod.n_stavka }}</p>
                     </div>
                     <div class="panel">
-                        <div class="buttons left">
-                            <div class="ui form">
-                                <div class="inline fields">
-                                    <div class="sixteen wide field">
-                                        <label>Поиск</label>
-                                        <input type="text" placeholder="Искать дисциплину..." name="search">
-                                    </div>
-                                    <div class="field">
-                                        <a id="search-btn" class="medium ui primary button"><i class="search icon"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <form id="download-xls" method="post">
                             {% csrf_token %}
                         </form>

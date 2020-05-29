@@ -13,17 +13,23 @@
                         {% if prepod %}{{ prepod.fio }}{% endif %}</h1>
                     <div class="panel">
                         <div class="buttons left">
-                            <div class="ui form">
+                            <form class="ui form">
                                 <div class="inline fields">
                                     <div class="sixteen wide field">
                                         <label>Поиск</label>
-                                        <input type="text" placeholder="Искать дисциплину..." name="search">
+                                        <input type="text" placeholder="Искать дисциплину..." name="search"
+                                               value="{{ search|default_if_none:'' }}">
                                     </div>
                                     <div class="field">
-                                        <a id="search-btn" class="medium ui primary button"><i class="search icon"></i></a>
+                                        <button class="medium ui primary button"><i class="search icon"></i></button>
                                     </div>
+                                    {% if search %}
+                                        <div class="field">
+                                            <a href="{% url 'disciplines:list' %}" class="medium ui primary button"><i class="close icon"></i></a>
+                                        </div>
+                                    {% endif %}
                                 </div>
-                            </div>
+                            </form>
                         </div>
                         {% if request.user.is_superuser %}
                             <div class="buttons right">
@@ -138,12 +144,21 @@
                     </div>
                     <div class="child-center">
                         <div class="ui pagination menu">
-                            {% for p in pages %}
-                                <a href="/disciplines/list/?page={{ p|add:1 }}"
-                                   class="{% if p|add:1 == page %} active {% endif %} item">
-                                    {{ p|add:1 }}
-                                </a>
-                            {% endfor %}
+                            {% if search %}
+                                {% for p in pages %}
+                                    <a href="/disciplines/list/?search={{ search }}&page={{ p|add:1 }}"
+                                       class="{% if p|add:1 == page %} active {% endif %} item">
+                                        {{ p|add:1 }}
+                                    </a>
+                                {% endfor %}
+                            {% else %}
+                                {% for p in pages %}
+                                    <a href="/disciplines/list/?page={{ p|add:1 }}"
+                                       class="{% if p|add:1 == page %} active {% endif %} item">
+                                        {{ p|add:1 }}
+                                    </a>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>

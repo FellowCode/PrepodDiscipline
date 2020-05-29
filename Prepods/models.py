@@ -7,9 +7,9 @@ class Prepod(models.Model):
 
     DOLZHNOST = [('Зав. кафедрой', 'Зав. кафедрой'), ('Декан', 'Декан'), ('Профессор', 'Профессор'), ('Доцент', 'Доцент'), ('Ст. преподаватель', 'Ст. преподаватель'), ('Ассистент', 'Ассистент')]
 
-    PRAVA = [('raspred', 'Распределение и просмотр'), ('prosmotr', 'Только просмотр по кафедре'), (None, 'Просмотр своих дисциплин')]
+    PRAVA = [('raspred', 'Распределение и просмотр'), ('prosmotr', 'Только просмотр по кафедре'), ('None', 'Просмотр своих дисциплин')]
 
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='prepod', blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='prepod', blank=True)
 
     last_name = models.CharField(max_length=64, verbose_name="Фамилия")
     first_name = models.CharField(max_length=64, verbose_name="Имя")
@@ -25,7 +25,7 @@ class Prepod(models.Model):
 
     chasov_stavki = models.IntegerField(verbose_name="Часов ставки")
 
-    prava = models.CharField(max_length=128, choices=PRAVA, default=None, verbose_name='Права', null=True, blank=True)
+    prava = models.CharField(max_length=128, choices=PRAVA, default='None', verbose_name='Права')
 
     def save(self, **kwargs):
         self.fio = self.get_fio()
@@ -50,7 +50,7 @@ class Prepod(models.Model):
         return self.dolzhnost
 
     def get_fio(self):
-        return self.__str__()
+        return f'{self.last_name} {self.first_name[0]}.{self.surname[0]}.'
 
     def __str__(self):
-        return f'{self.last_name} {self.first_name[0]}.{self.surname[0]}.'
+        return self.get_fio()

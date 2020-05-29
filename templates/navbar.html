@@ -5,13 +5,14 @@
             <li class="logo">
                 <a href="{% url 'main:index' %}"><img alt="Biblior" src="{% static 'img/logo.png' %}"></a>
             </li>
+            <li><a href="/">Главная</a></li>
         </ul>
         {% if request.user.is_authenticated %}
             <ul class="right">
                 {% if request.user.is_superuser %}
                     <li><a href="/admin/"><i class="star plus icon"></i>Админка</a></li>
                 {% endif %}
-                <li><a>{% if request.user.prepod %}{{ request.user.prepod.fio }}{% else %}{{ request.user.email }}{% endif %}</a></li>
+                <li><a href="{% url 'accounts:personal_area' %}">Личный кабинет {{ user.get_fio }}</a></li>
                 <li><a href="{% url 'accounts:logout' %}"><i class="sign out alternate icon"></i>Выход</a></li>
             </ul>
         {% else %}

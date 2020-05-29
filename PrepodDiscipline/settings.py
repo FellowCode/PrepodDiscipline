@@ -25,7 +25,7 @@ SECRET_KEY = '9ab_+kc@d7lzw_)k1v62*a)ml5w-pzsmh9k$p2ps*5)q8bdq8!'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -131,3 +131,17 @@ STATICFILES_DIRS = [
 LOGIN_URL = '/accounts/login/'
 
 AUTH_USER_MODEL = 'Accounts.User'
+
+
+# SMTP Settings
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.yandex.ru'
+
+EMAIL_PORT = 465
+
+EMAIL_HOST_USER = 'no-reply@disciplineinfo.ru'
+EMAIL_HOST_PASSWORD = 'pgusa2020'
+
+EMAIL_USE_SSL = True

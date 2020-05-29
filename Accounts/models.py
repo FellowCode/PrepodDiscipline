@@ -22,6 +22,30 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_salt(self):
         return self.email
 
+    def is_zav_kafedra(self):
+        for prepod in self.prepod.all():
+            if prepod.dolzhnost == 'Зав. кафедрой':
+                return True
+        return False
+
+    def raspred(self):
+        for prepod in self.prepod.all():
+            if prepod.prava == 'raspred':
+                return True
+        return False
+
+    def prosmotr(self):
+        for prepod in self.prepod.all():
+            if prepod.prava == 'prosmotr':
+                return True
+        return False
+
+    def get_fio(self):
+        try:
+            return self.prepod.first().get_fio()
+        except:
+            return self.email
+
     class Meta:
         ordering = ['id']
         verbose_name = 'Пользователь'

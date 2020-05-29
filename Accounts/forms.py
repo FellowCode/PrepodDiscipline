@@ -7,6 +7,8 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm):
         model = User
         fields = ('email',)
+
+
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
@@ -89,3 +91,35 @@ class ChangePasswordForm(forms.Form):
         if firstpassword != secondpassword:
             self.add_error("spassword", "Пароли не совпадают")
         return secondpassword
+
+
+class RestorePasswordForm(forms.Form):
+    email = forms.CharField(required=True)
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        self.cleaned_data['user'] = User.objects.get_or_none(email=email)
+        if not self.cleaned_data['user']:
+            self.add_error("email", "Такого пользователя не существует")
+        return email
+
+
+class SetNewPasswordForm(forms.Form):
+    fpassword = forms.CharField(required=True)
+
+    spassword = forms.CharField(required=True)
+
+    def clean_fpassword(self):
+        password = self.cleaned_data['fpassword']
+        if len(password) < 8:
+            self.add_error("fpassword", "Не менее 8 сиволов")
+        if ';' in password:
+            self.add_error("fpassword", "Недопустимый символ в пароле")
+        return password
+
+    def clean_spassword(self):
+        fpassword = self.cleaned_data['fpassword']
+        spassword = self.cleaned_data['spassword']
+        if fpassword != spassword:
+            self.add_error("spassword", "Пароли не совпадают")
+        return spassword
