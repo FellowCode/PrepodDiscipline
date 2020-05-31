@@ -14,7 +14,7 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser')}),
     )
     add_fieldsets = (
         (None, {
@@ -50,5 +50,5 @@ class CustomUserAdmin(UserAdmin):
 
     list_display_links = ['email']
 
-    readonly_fields = ['password', '_last_login', 'create_date', '_mail_dt']
+    readonly_fields = ['_last_login', 'create_date', '_mail_dt']
     exclude = ['last_login', 'date_joined', 'mail_dt', 'groups', 'user_permissions']

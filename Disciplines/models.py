@@ -239,7 +239,9 @@ class Nagruzka(models.Model):
     summary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
-        return f'{self.discipline.name} {self.discipline.form}'
+        if self.discipline:
+            return f'{self.discipline.name} {self.discipline.form}'
+        return 'None'
 
     def save(self, **kwargs):
         self.summary = self.get_summary()

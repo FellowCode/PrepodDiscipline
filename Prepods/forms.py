@@ -7,4 +7,4 @@ class PrepodForm(ModelForm):
 
     class Meta:
         model = Prepod
-        exclude = ['id']
+        exclude = ['id', 'user']

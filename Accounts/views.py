@@ -7,6 +7,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
+from Prepods.models import Prepod
 from mail.smtp import SendRestoreMail
 from .forms import *
 from django.contrib import auth
@@ -51,6 +52,7 @@ def registration(request):
         if form.is_valid():
             user = User.objects.create_user(email=form.cleaned_data['email'],
                                             password=form.cleaned_data['fpassword'])
+            Prepod.objects.filter(email=user.email).update(user=user)
             auth.login(request, user)
             return redirect(reverse('main:index'))
         return render(request, 'Accounts/Registration.html', {'form': form})

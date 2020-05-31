@@ -7,6 +7,7 @@ from Disciplines.models import *
 from utils.decorators import make_async
 from queue import LifoQueue
 from time import sleep
+from .shortcuts import get_group_nagruzki, annotate_pochasovka, annotate_group_nagruzki
 
 CELL_NAMES = ['code', 'form', 'shifr', 'name', 'fakultet', 'specialnost', 'kurs', 'semestr', 'period', 'nedeli',
               'trudoemkost', 'chas_v_nedelu', 'srs', 'chas_po_planu', 'student', 'group', 'podgroup', 'lk', 'pr',
@@ -58,8 +59,10 @@ def handle_upload_disciplines(f, action):
 
     parse_xls_disciplines(filename)
 
+
 upload_progress = '0/0 0 %'
 parsing = False
+
 
 @make_async
 def parse_xls_disciplines(filename):
@@ -90,7 +93,7 @@ def parse_xls_disciplines(filename):
         new_disciplines_id.append(d.id)
         if d.id in delete_disciplines_id:
             delete_disciplines_id.remove(d.id)
-        if rownum%30 == 0:
+        if rownum % 30 == 0:
             upload_progress = f'{rownum}/{sheet.nrows} {int(rownum / sheet.nrows * 100)} %'
 
     while len(delete_disciplines_id) > 500:
@@ -160,3 +163,55 @@ def create_prep_ds_xls(prepod):
     url = f'static/files/{filename}'
     wb.save(url)
     return '/' + url, filename
+
+
+def excel_shtat_rasp(request):
+    nagruzki_budget = get_group_nagruzki(request, vne_budget=False)
+    nagruzki_budget = annotate_pochasovka(nagruzki_budget)
+    nagruzki_vnebudget = get_group_nagruzki(request, vne_budget=True)
+    nagruzki_vnebudget = annotate_pochasovka(nagruzki_vnebudget)
+    nagruzki = annotate_group_nagruzki(nagruzki_budget, nagruzki_vnebudget)
+
+    rb = xlrd.open_workbook('static/files/st_r.xls', formatting_info=True)
+    wb = copy(rb)
+    sheet = wb.get_sheet(0)
+    i = 0
+    for id, prepod in nagruzki.items():
+        row = i + 12
+        setOutCell(sheet, row, 0, i + 1)
+        setOutCell(sheet, row, 1, prepod['prepod__dolzhnost'])
+        setOutCell(sheet, row, 2, Prepod.get_display_value('PKGD', prepod['prepod__pkgd']))
+        setOutCell(sheet, row, 3, prepod['prepod__kv_uroven'])
+        if prepod['prepod__srok_izbr']:
+            setOutCell(sheet, row, 4, prepod['prepod__srok_izbr'].strftime('%d.%m.%Y'))
+        setOutCell(sheet, row, 5, prepod['prepod__fio'])
+        st_zv = []
+        if prepod['prepod__uch_stepen']:
+            st_zv.append(prepod['prepod__uch_stepen'])
+        if prepod['prepod__uch_zvanie']:
+            st_zv.append(Prepod.get_display_value('UCH_ZVANIE', prepod['prepod__uch_zvanie']))
+        setOutCell(sheet, row, 6, ', '.join(st_zv))
+        if prepod['prepod__dogovor']:
+            setOutCell(sheet, row, 7, 'Договор')
+        if prepod['n_stavka'] and prepod['n_stavka'] > 0:
+            setOutCell(sheet, row, 8, prepod['n_stavka'])
+        if prepod['pochas_stavka'] and prepod['pochas_stavka'] > 0:
+            setOutCell(sheet, row, 9, f"{prepod['pochas_stavka']}\n({prepod['sum_p']})")
+        if prepod['vnebudget_stavka'] and prepod['vnebudget_stavka'] > 0:
+            setOutCell(sheet, row, 10, prepod['vnebudget_stavka'])
+        if prepod['vnebudget_p_stavka'] and prepod['vnebudget_p_stavka'] > 0:
+            setOutCell(sheet, row, 11, f"{prepod['vnebudget_p_stavka']}\n({prepod['sum_p_vnebudget']})")
+        i += 1
+
+
+    if not os.path.exists(f'tmp/xls/{request.user.id}'):
+        os.makedirs(f'tmp/xls/{request.user.id}')
+    if request.user.prepod.count() > 0:
+        kafedra = request.user.prepod.first().kafedra.name
+    else:
+        kafedra = 'Admin'
+    filename = f'{kafedra} - штатное расписание.xls'
+    path = f'tmp/xls/{request.user.id}/{filename}'
+    wb.save(path)
+
+    return path

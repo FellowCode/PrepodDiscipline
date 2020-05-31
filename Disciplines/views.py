@@ -6,6 +6,7 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, reverse, redirect
 
 from utils.decorators import prepod_only
+from utils.shortcuts import get_group_nagruzki
 from .models import Discipline, Nagruzka, Archive
 from Prepods.models import Prepod
 
@@ -101,6 +102,7 @@ def disciplines_download(request):
         return JsonResponse({'status': 'OK'})
     raise Http404
 
+
 @login_required
 @prepod_only
 def discipline_nagruzka(request, dis_id):
@@ -112,11 +114,9 @@ def discipline_nagruzka(request, dis_id):
 
     editable = request.user.is_superuser or request.user.is_zav_kafedra() or request.user.raspred()
 
-
     data = {'dis': dis, 'prepods': prepods, 'nagruzki': nagruzki, 'editable': editable, 'archives': archives,
-                   'edit': request.GET.get('edit'), 'stavka_range': stavka_range(), 'errors': dis.check_nagruzka_sum(),
-                   'source_page': request.GET.get('source_page', 1)}
-
+            'edit': request.GET.get('edit'), 'stavka_range': stavka_range(), 'errors': dis.check_nagruzka_sum(),
+            'source_page': request.GET.get('source_page', 1)}
 
     return render(request, 'Disciplines/Nagruzka.html', data)
 
@@ -208,15 +208,8 @@ from django.db.models import Sum, Q
 @prepod_only
 def raspred_stavok(request):
     vne_budget = request.GET.get('vne_budget')
-    if vne_budget:
-        nagruzki = Nagruzka.objects.filter(archive=None, discipline__form__name__contains='_В')
-    else:
-        nagruzki = Nagruzka.objects.filter(archive=None).exclude(discipline__form__name__contains='_В').all()
-    if not request.user.is_superuser:
-        nagruzki = nagruzki.filter(discipline__kafedra=request.user.prepod.first().kafedra)
-    group_nagruzki = nagruzki.values('prepod__fio', 'prepod__dolzhnost',
-                                     'prepod__kv_uroven', 'n_stavka', 'pochasovka',
-                                     'prepod__chasov_stavki').order_by('prepod__fio').annotate(Sum('summary'))
+    group_nagruzki = get_group_nagruzki(request, vne_budget)
+
     return render(request, 'Disciplines/RaspredStavok.html',
                   {'group_nagruzki': group_nagruzki, 'stavka_range': stavka_range, 'vne_budget': vne_budget})
 

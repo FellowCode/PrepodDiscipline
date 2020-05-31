@@ -32,16 +32,22 @@
                             </a>
                         </div>
                         <div class="sixteen wide">
-                            <a href="{% url 'disciplines:raspred_stavok' %}" class="search-papers massive ui primary button {% if dis_errors %}disabled{% endif %}">
+                            <a href="{% url 'disciplines:raspred_stavok' %}"
+                               class="search-papers massive ui primary button {% if dis_errors %}disabled{% endif %}">
                                 Распределение ставок
                             </a>
                         </div>
                         {% if request.user.is_superuser or user.is_zav_kafedra %}
-                        <div class="sixteen wide">
-                            <a href="{% url 'prepods:list' %}" class="search-papers massive ui primary button">
-                                Преподаватели
-                            </a>
-                        </div>
+                            <div class="sixteen wide">
+                                <a href="{% url 'prepods:list' %}" class="search-papers massive ui primary button">
+                                    Преподаватели
+                                </a>
+                            </div>
+                            <div class="sixteen wide">
+                                <a href="{% url 'main:download_shtat_rasp' %}" class="search-papers massive ui primary button {% if dis_errors %}disabled{% endif %}">
+                                    Выгрузить штатное расписание
+                                </a>
+                            </div>
                         {% endif %}
                     {% elif user.prepod.all.count > 0 %}
                         <div class="sixteen wide">

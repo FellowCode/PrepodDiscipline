@@ -40,7 +40,7 @@
                                     <td data-label="ФИО"><a
                                             href="{% iurl 'prepods:prepod_form_id' id='prepod.id' %}">{{ prepod.fio }}</a>
                                     </td>
-                                    <td data-label="Пользователь">{{ prepod.user.email|default_if_none:"-" }}</td>
+                                    <td data-label="Пользователь">{{ prepod.email|default_if_none:"-" }}</td>
                                     <td data-label="Кафедра">{{ prepod.kafedra.name }}</td>
                                     <td data-label="Должность">{{ prepod.dolzhnost }}</td>
                                     <td data-label="Кв. уровень">{{ prepod.kv_uroven }}</td>

@@ -65,11 +65,7 @@ class KafedraAdmin(admin.ModelAdmin):
 
 @admin.register(Nagruzka)
 class NagruzkaAdmin(admin.ModelAdmin):
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
+    pass
 
 class NagruzkaInline(admin.TabularInline):
     model = Nagruzka
@@ -118,15 +114,3 @@ class DisciplineAdmin(admin.ModelAdmin):
                        'aspirantura', 'rukovodstvo', 'dop_chasi', 'summary', 'kafedra', 'potok']
 
     inlines = [NagruzkaInline, ArchiveInline]
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_view_or_change_permission(self, request, obj=None):
-        if hasattr(request.user, 'prepod') and request.user.prepod.dolzhnost == 'Зав. кафедрой':
-            return True
-        # If a user is not a teacher, let Django evaluate their specific permissions (a superusuer will always have permission if you do it this way)
-        return super().has_view_or_change_permission(request, obj=obj)

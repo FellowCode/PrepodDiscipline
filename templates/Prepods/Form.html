@@ -19,20 +19,16 @@
                             <div class="ui error message">
                                 <div class="header">Исправьте ошибки</div>
                                 <ul class="list">
-                                {% for key, error in form.errors.items %}
-                                    <li><strong>{{ form.fields|get_label:key }}</strong>: {{ error.0 }}</li>
-                                {% endfor %}
+                                    {% for key, error in form.errors.items %}
+                                        <li><strong>{{ form.fields|get_label:key }}</strong>: {{ error.0 }}</li>
+                                    {% endfor %}
                                 </ul>
                             </div>
                         {% endif %}
                         <div class="field">
-                            <label>Пользователь</label>
-                            <select id="user-dropdown" name="user" class="ui search dropdown clearable" data-preselect="{{ form.user.value|default_if_none:'' }}">
-                                    <option class="item" value="">Не назначен</option>
-                                    {% for user in users %}
-                                        <option value="{{ user.id }}">{{ user.email }}</option>
-                                    {% endfor %}
-                            </select>
+                            <label>Email</label>
+                            <input type="email" name="email" value="{{ form.email.value|default_if_none:'' }}"
+                                   placeholder="">
                         </div>
                         <div class="field">
                             <label>Фамилия</label>
@@ -65,20 +61,59 @@
                                 </div>
                             </div>
                         {% endif %}
-                        <div class="field">
-                            <label>Должность</label>
-                            <div id="dolzhnost-dropdown" class="ui selection dropdown"
-                                 data-preselect="{{ form.dolzhnost.value|default_if_none:'' }}">
-                                <input type="hidden" name="dolzhnost">
-                                <i class="dropdown icon"></i>
-                                <div class="default text">Должность</div>
-                                <div class="menu">
-                                    {% for value, text in form.dolzhnost.field.choices %}
-                                        <div class="item" data-value="{{ value }}">{{ text }}</div>
-                                    {% endfor %}
+                        <div class="two fields">
+                            <div class="field">
+                                <label>Должность</label>
+                                <div id="dolzhnost-dropdown" class="ui selection dropdown"
+                                     data-preselect="{{ form.dolzhnost.value|default_if_none:'' }}">
+                                    <input type="hidden" name="dolzhnost">
+                                    <i class="dropdown icon"></i>
+                                    <div class="default text">Должность</div>
+                                    <div class="menu">
+                                        {% for value, text in form.dolzhnost.field.choices %}
+                                            <div class="item" data-value="{{ value }}">{{ text }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label>ПКГД</label>
+                                <div class="ui selection dropdown"
+                                     data-preselect="{{ form.pkgd.value|default_if_none:'pps' }}">
+                                    <input type="hidden" name="pkgd">
+                                    <i class="dropdown icon"></i>
+                                    <div class="default text">ПГКД</div>
+                                    <div class="menu">
+                                        {% for value, text in form.pkgd.field.choices %}
+                                            <div class="item" data-value="{{ value }}">{{ text }}</div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="two fields">
+                            <div class="field">
+                                <label>Ученая степень</label>
+                                <input type="text" name="uch_stepen"
+                                       value="{{ form.uch_stepen.value|default_if_none:'' }}"
+                                       placeholder="">
+                            </div>
+                            <div class="field">
+                                <label>Ученое звание</label>
+                                <div class="ui selection dropdown"
+                                     data-preselect="{{ form.uch_zvanie.value|default_if_none:'' }}">
+                                    <input type="hidden" name="uch_zvanie">
+                                    <i class="dropdown icon"></i>
+                                    <div class="default text">Ученое звание</div>
+                                    <div class="menu">
+                                        {% for value, text in form.uch_zvanie.field.choices %}
+                                            <div class="item" data-value="{{ value }}">{{ text }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="two fields">
                             <div class="field">
                                 <label>Квалификационный уровень</label>
@@ -91,6 +126,23 @@
                                 <input type="number" name="chasov_stavki"
                                        value="{{ form.chasov_stavki.value|default_if_none:'' }}"
                                        placeholder="">
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Сроки избрания</label>
+                            <div class="ui calendar">
+                                <div class="ui input left icon">
+                                    <i class="calendar icon"></i>
+                                    <input type="text" name="srok_izbr" placeholder="Дата" autocomplete="off"
+                                           value="{{ form.srok_izbr.value|default_if_none:'' }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <div class="ui checkbox {% if form.dogovor.value %} checked {% endif %}">
+                                <input type="checkbox" tabindex="0" class="hidden" name="dogovor" {% if form.dogovor.value %} checked {% endif %}>
+                                <label>Договор с вузом</label>
                             </div>
                         </div>
                         <div id="prava-field" class="field hide">
@@ -117,24 +169,27 @@
     </div>
 {% endblock %}
 {% block script %}
+    <script type="text/javascript" src="{% static 'js/calendar.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/custom_calendar.js' %}"></script>
     <script>
         $(document).ready(function () {
             $('.ui.dropdown').each(function (i) {
-                var value  = $(this).attr('data-preselect')
+                var value = $(this).attr('data-preselect')
                 if ($(this).hasClass('clearable'))
                     $(this).dropdown({clearable: true})
                 $(this).dropdown('set selected', value)
-                if ($(this).attr('id') === 'dolzhnost-dropdown' && value !== 'Зав. кафедрой'){
+                if ($(this).attr('id') === 'dolzhnost-dropdown' && value !== 'Зав. кафедрой') {
                     $('#prava-field').removeClass('hide')
                 }
             })
             $('#dolzhnost-dropdown').dropdown('setting', 'onChange', function (value, text, $choice) {
-                if (text === 'Зав. кафедрой'){
+                if (text === 'Зав. кафедрой') {
                     $('#prava-field').addClass('hide')
                 } else {
                     $('#prava-field').removeClass('hide')
                 }
             })
+            $('.ui.checkbox').checkbox()
         })
     </script>
 {% endblock %}
