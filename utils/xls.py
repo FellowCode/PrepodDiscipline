@@ -176,8 +176,20 @@ def excel_shtat_rasp(request):
     wb = copy(rb)
     sheet = wb.get_sheet(0)
     i = 0
+    n_stavka_sum = 0
+    n_p_stavka_sum = 0
+    n_p_ch_stavka_sum = 0
+    v_n_stavka_sum = 0
+    v_n_p_stavka_sum = 0
+    v_n_p_ch_stavka_sum = 0
     for id, prepod in nagruzki.items():
         row = i + 12
+        n_stavka_sum += prepod['n_stavka']
+        n_p_stavka_sum += prepod['pochas_stavka']
+        n_p_ch_stavka_sum += prepod['sum_p']
+        v_n_stavka_sum += prepod['vnebudget_stavka']
+        v_n_p_stavka_sum += prepod['vnebudget_p_stavka']
+        v_n_p_ch_stavka_sum += prepod['sum_p_vnebudget']
         setOutCell(sheet, row, 0, i + 1)
         setOutCell(sheet, row, 1, prepod['prepod__dolzhnost'])
         setOutCell(sheet, row, 2, Prepod.get_display_value('PKGD', prepod['prepod__pkgd']))
@@ -203,6 +215,13 @@ def excel_shtat_rasp(request):
             setOutCell(sheet, row, 11, f"{prepod['vnebudget_p_stavka']}\n({prepod['sum_p_vnebudget']})")
         i += 1
 
+    setOutCell(sheet, 99, 8, n_stavka_sum)
+    setOutCell(sheet, 99, 9, f"{n_p_stavka_sum}\n({n_p_ch_stavka_sum})")
+    setOutCell(sheet, 99, 10, v_n_stavka_sum)
+    setOutCell(sheet, 99, 11, f"{v_n_p_stavka_sum}\n({v_n_p_ch_stavka_sum})")
+    setOutCell(sheet, 100, 8, n_stavka_sum + n_p_stavka_sum)
+    setOutCell(sheet, 100, 10, v_n_stavka_sum + v_n_p_stavka_sum)
+    setOutCell(sheet, 101, 8, n_stavka_sum + n_p_stavka_sum + v_n_stavka_sum + v_n_p_stavka_sum)
 
     if not os.path.exists(f'tmp/xls/{request.user.id}'):
         os.makedirs(f'tmp/xls/{request.user.id}')
