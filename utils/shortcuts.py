@@ -129,17 +129,17 @@ def annotate_group_nagruzki(group_nagruzki_budget, group_nagruzki_vnebudget):
         if key in group_nagruzki_vnebudget:
             vnebudget = group_nagruzki_vnebudget.pop(key)
             group_nagruzki_budget[key]['vnebudget_stavka'] = vnebudget['n_stavka']
-            group_nagruzki_budget[key]['vnebudget_p_stavka'] = vnebudget.get('pochas_stavka')
-            group_nagruzki_budget[key]['sum_p_vnebudget'] = vnebudget['sum_p']
+            group_nagruzki_budget[key]['vnebudget_p_stavka'] = vnebudget.get('pochas_stavka', 0)
+            group_nagruzki_budget[key]['sum_p_vnebudget'] = vnebudget.get('sum_p', 0)
             group_nagruzki_budget[key].pop('pochasovka')
     group_nagruzki = group_nagruzki_budget
     for key, nagruzka in group_nagruzki_vnebudget.items():
         nagruzka.pop('pochasovka')
         group_nagruzki[key] = nagruzka
         group_nagruzki[key]['vnebudget_stavka'] = nagruzka['n_stavka']
-        group_nagruzki[key]['vnebudget_p_stavka'] = nagruzka.get('pochas_stavka')
+        group_nagruzki[key]['vnebudget_p_stavka'] = nagruzka.get('pochas_stavka', 0)
         group_nagruzki[key]['sum_p_vnebudget'] = nagruzka['sum_p']
-        group_nagruzki[key]['n_stavka'] = None
-        group_nagruzki[key]['pochas_stavka'] = None
-        group_nagruzki[key]['sum_p'] = None
+        group_nagruzki[key]['n_stavka'] = 0
+        group_nagruzki[key]['pochas_stavka'] = 0
+        group_nagruzki[key]['sum_p'] = 0
     return group_nagruzki

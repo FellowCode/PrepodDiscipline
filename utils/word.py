@@ -23,12 +23,12 @@ def word_shtat_rasp(request):
     v_n_p_stavka_sum = 0
     v_n_p_ch_stavka_sum = 0
     for id, prepod in nagruzki.items():
-        n_stavka_sum += prepod['n_stavka']
-        n_p_stavka_sum += prepod['pochas_stavka']
-        n_p_ch_stavka_sum += prepod['sum_p']
-        v_n_stavka_sum += prepod['vnebudget_stavka']
-        v_n_p_stavka_sum += prepod['vnebudget_p_stavka']
-        v_n_p_ch_stavka_sum += prepod['sum_p_vnebudget']
+        n_stavka_sum += prepod.get('n_stavka', 0)
+        n_p_stavka_sum += prepod.get('pochas_stavka', 0)
+        n_p_ch_stavka_sum += prepod.get('sum_p', 0)
+        v_n_stavka_sum += prepod.get('vnebudget_stavka', 0)
+        v_n_p_stavka_sum += prepod.get('vnebudget_p_stavka', 0)
+        v_n_p_ch_stavka_sum += prepod.get('sum_p_vnebudget', 0)
 
         row = i + 14
         doc.tables[0].cell(row, 0).text = str(i + 1)
@@ -46,14 +46,14 @@ def word_shtat_rasp(request):
         doc.tables[0].cell(row, 6).text = ', '.join(st_zv)
         if prepod['prepod__dogovor']:
             doc.tables[0].cell(row, 7).text = 'Договор'
-        if prepod['n_stavka'] and prepod['n_stavka'] > 0:
+        if prepod.get('n_stavka') and prepod['n_stavka'] > 0:
             doc.tables[0].cell(row, 8).text = str(prepod['n_stavka'])
-        if prepod['pochas_stavka'] and prepod['pochas_stavka'] > 0:
-            doc.tables[0].cell(row, 9).text = f"{prepod['pochas_stavka']}\n({prepod['sum_p']})"
-        if prepod['vnebudget_stavka'] and prepod['vnebudget_stavka'] > 0:
+        if prepod.get('pochas_stavka') and prepod['pochas_stavka'] > 0:
+            doc.tables[0].cell(row, 9).text = f"{prepod['pochas_stavka']}\n({prepod.get('sum_p', 0)})"
+        if prepod.get('vnebudget_stavka') and prepod['vnebudget_stavka'] > 0:
             doc.tables[0].cell(row, 10).text = str(prepod['vnebudget_stavka'])
-        if prepod['vnebudget_p_stavka'] and prepod['vnebudget_p_stavka'] > 0:
-            doc.tables[0].cell(row, 11).text = f"{prepod['vnebudget_p_stavka']}\n({prepod['sum_p_vnebudget']})"
+        if prepod.get('vnebudget_p_stavka') and prepod['vnebudget_p_stavka'] > 0:
+            doc.tables[0].cell(row, 11).text = f"{prepod['vnebudget_p_stavka']}\n({prepod.get('sum_p_vnebudget', 0)})"
         i += 1
 
     doc.tables[0].cell(34, 8).text = str(n_stavka_sum)
@@ -77,9 +77,9 @@ def word_shtat_rasp(request):
     if request.user.prepod.count() > 0:
         kafedra = request.user.prepod.first().kafedra.name
     else:
-        kafedra = 'Admin'
+        kafedra = 'Все кафедры'
 
-    filename = f'{kafedra} - штатное расписание.docx'
+    filename = f'{kafedra} - штатное расписание.doc'
     path = f'tmp/word/{request.user.id}/{filename}'
 
     doc.save(path)

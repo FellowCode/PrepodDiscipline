@@ -15,7 +15,7 @@ class Prepod(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='prepod', blank=True)
 
-    email = models.EmailField(verbose_name='Email', null=True)
+    email = models.EmailField(verbose_name='Email', null=True, blank=True)
 
     last_name = models.CharField(max_length=64, verbose_name="Фамилия")
     first_name = models.CharField(max_length=64, verbose_name="Имя")

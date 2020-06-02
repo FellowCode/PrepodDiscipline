@@ -184,12 +184,13 @@ def excel_shtat_rasp(request):
     v_n_p_ch_stavka_sum = 0
     for id, prepod in nagruzki.items():
         row = i + 12
-        n_stavka_sum += prepod['n_stavka']
-        n_p_stavka_sum += prepod['pochas_stavka']
-        n_p_ch_stavka_sum += prepod['sum_p']
-        v_n_stavka_sum += prepod['vnebudget_stavka']
-        v_n_p_stavka_sum += prepod['vnebudget_p_stavka']
-        v_n_p_ch_stavka_sum += prepod['sum_p_vnebudget']
+        n_stavka_sum += prepod.get('n_stavka', 0)
+        n_p_stavka_sum += prepod.get('pochas_stavka', 0)
+        n_p_ch_stavka_sum += prepod.get('sum_p', 0)
+        v_n_stavka_sum += prepod.get('vnebudget_stavka', 0)
+        v_n_p_stavka_sum += prepod.get('vnebudget_p_stavka', 0)
+        v_n_p_ch_stavka_sum += prepod.get('sum_p_vnebudget', 0)
+
         setOutCell(sheet, row, 0, i + 1)
         setOutCell(sheet, row, 1, prepod['prepod__dolzhnost'])
         setOutCell(sheet, row, 2, Prepod.get_display_value('PKGD', prepod['prepod__pkgd']))
@@ -205,13 +206,13 @@ def excel_shtat_rasp(request):
         setOutCell(sheet, row, 6, ', '.join(st_zv))
         if prepod['prepod__dogovor']:
             setOutCell(sheet, row, 7, 'Договор')
-        if prepod['n_stavka'] and prepod['n_stavka'] > 0:
+        if prepod.get('n_stavka') and prepod['n_stavka'] > 0:
             setOutCell(sheet, row, 8, prepod['n_stavka'])
-        if prepod['pochas_stavka'] and prepod['pochas_stavka'] > 0:
+        if prepod.get('pochas_stavka') and prepod['pochas_stavka'] > 0:
             setOutCell(sheet, row, 9, f"{prepod['pochas_stavka']}\n({prepod['sum_p']})")
-        if prepod['vnebudget_stavka'] and prepod['vnebudget_stavka'] > 0:
+        if prepod.get('vnebudget_stavka') and prepod['vnebudget_stavka'] > 0:
             setOutCell(sheet, row, 10, prepod['vnebudget_stavka'])
-        if prepod['vnebudget_p_stavka'] and prepod['vnebudget_p_stavka'] > 0:
+        if prepod.get('vnebudget_p_stavka') and prepod['vnebudget_p_stavka'] > 0:
             setOutCell(sheet, row, 11, f"{prepod['vnebudget_p_stavka']}\n({prepod['sum_p_vnebudget']})")
         i += 1
 
