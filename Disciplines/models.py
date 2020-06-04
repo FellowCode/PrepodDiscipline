@@ -1,7 +1,8 @@
 from django.db import models
+from django.db.models import Q, Count
+
 from utils.model_manager import MyManager
 from Prepods.models import Prepod
-
 
 class DisciplineForm(models.Model):
     objects = MyManager()
@@ -23,6 +24,14 @@ class Fakultet(models.Model):
 
     def __str__(self):
         return self.name
+
+    def check_errors(self):
+        disciplines = Discipline.objects.filter(fakultet=self)
+        dis_errors = len(Discipline.objects.filter(errors=True).all()) > 0
+        dis_errors = dis_errors or disciplines.annotate(
+            num_nagruzki=Count('nagruzki', filter=Q(nagruzki__archive=None))).filter(
+            num_nagruzki__lte=0).count() > 0
+        return dis_errors
 
     class Meta:
         verbose_name = 'Факультет'

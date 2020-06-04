@@ -2,15 +2,16 @@ import operator
 from functools import reduce
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse, Http404, FileResponse
 from django.shortcuts import render, reverse, redirect
 
 from utils.decorators import prepod_only
-from utils.shortcuts import get_group_nagruzki
-from .models import Discipline, Nagruzka, Archive
+from utils.shortcuts import get_group_nagruzki, get_shtat_rasp, iredirect
+from utils.word import word_shtat_rasp
+from .models import Discipline, Nagruzka, Archive, Fakultet
 from Prepods.models import Prepod
 
-from utils.xls import handle_upload_disciplines, create_disciplines_xls
+from utils.xls import handle_upload_disciplines, create_disciplines_xls, excel_shtat_rasp
 from utils import xls
 
 
@@ -237,3 +238,30 @@ def raspred_stavok_save(request):
     nagruzki.filter(**filter).update(**update)
 
     return redirect(reverse('disciplines:raspred_stavok'))
+
+
+@login_required
+@prepod_only
+def shtat_raspisanie(request):
+    if request.GET.get('fakultet', '') != '':
+        cur_fakultet = Fakultet.objects.get_or_none(id=request.GET.get('fakultet'))
+    else:
+        cur_fakultet = None
+    prepods = get_shtat_rasp(request, fakultet=cur_fakultet)
+    fakultets = Fakultet.objects.all()
+    return render(request, 'Disciplines/ShtatRaspisanie.html',
+                  {'prepods': prepods, 'fakultets': fakultets, 'cur_fakultet': cur_fakultet})
+
+
+@login_required
+@prepod_only
+def download_shtatnoe_raspisanie(request):
+    if request.user.is_superuser or request.user.is_zav_kafedra:
+        if request.GET.get('type', 'word') == 'word':
+            path = word_shtat_rasp(request, fakultet_id=request.GET.get('fakultet', ''))
+        elif request.GET.get('type', 'word') == 'excel':
+            path = excel_shtat_rasp(request, fakultet_id=request.GET.get('fakultet', ''))
+        else:
+            path = excel_shtat_rasp(request, fakultet_id=request.GET.get('fakultet', ''), _all=True)
+        return FileResponse(open(path, 'rb'))
+    return iredirect('main:index')

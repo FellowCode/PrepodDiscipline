@@ -11,15 +11,3 @@ from utils.xls import excel_shtat_rasp
 
 def index(request):
     return render(request, 'Main/Index.html', {'dis_errors': check_discipline_errors(request)})
-
-
-@login_required
-@prepod_only
-def download_shtatnoe_raspisanie(request):
-    if request.user.is_superuser or request.user.is_zav_kafedra:
-        if request.GET.get('type', 'word') == 'word':
-            path = word_shtat_rasp(request)
-        else:
-            path = excel_shtat_rasp(request)
-        return FileResponse(open(path, 'rb'))
-    return iredirect('main:index')

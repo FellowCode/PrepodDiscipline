@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load modified %}
+
+{% block title %}Список дисциплин | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container full-width">
+        <div class="child-center">
+            <div class="discipline-list cblock">
+                <div class="content">
+                    <h1 class="ui center aligned header">Список дисциплин
+                        {% if prepod %}{{ prepod.fio }}{% endif %}</h1>
+                    <div class="panel">
+                        <div class="buttons left" style="width: auto">
+                            <a href="{% url 'disciplines:download_shtat_rasp' %}?type=word"
+                               class="large ui primary button download">Скачать Word</a>
+                            <a href="{% url 'disciplines:download_shtat_rasp' %}?type=excel"
+                               class="large ui primary button download">Скачать Excel</a>
+                            <a href="{% url 'disciplines:download_shtat_rasp' %}?type=excel-all"
+                               class="large ui primary button download">Все кафедры Excel</a>
+                        </div>
+                        <div class="ui fluid search selection dropdown" data-preselect="{{ cur_fakultet.id }}">
+                            <input type="hidden" name="fakultet">
+                            <i class="dropdown icon"></i>
+                            <div class="default text">Факультет</div>
+                            <div class="menu">
+                                {% for fakultet in fakultets %}
+                                    {% if not fakultet.check_errors %}
+                                        <div class="item" data-value="{{ fakultet.id }}">{{ fakultet }}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div id="table-container" class="sixteen wide table-container">
+                        <table class="ui celled table tableFixHead">
+                            <thead>
+                            <tr>
+                                <th rowspan="2">№ п/п</th>
+                                <th rowspan="2">Наименование должности</th>
+                                <th rowspan="2">ПКГД</th>
+                                <th rowspan="2">Квалиф. уровень</th>
+                                <th rowspan="2">Сроки избрания</th>
+                                <th rowspan="2">ФИО сотрудника</th>
+                                <th rowspan="2">Уч.степень, уч.звание</th>
+                                <th rowspan="2">Договор с вузом</th>
+                                <th colspan="2">Нагрузка (бюджетная)</th>
+                                <th colspan="2">Нагрузка (внебюджетная)</th>
+                            </tr>
+                            <tr>
+                                <th>Ставка</th>
+                                <th>Часть ставки (почас.)</th>
+                                <th>Ставка</th>
+                                <th>Часть ставки (почас.)</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for row in prepods.rows %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    {% for col in row %}
+                                        <td>{{ col }}</td>
+                                    {% endfor %}
+                                </tr>
+
+                            {% endfor %}
+                            <tr>
+                                <td colspan="12"></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Всего</td>
+                                <td colspan="6"></td>
+                                <td>{{ prepods.sums.n_stavka_sum }}</td>
+                                <td>{{ prepods.sums.n_p_stavka_sum }} ({{ prepods.sums.n_p_ch_stavka_sum }})</td>
+                                <td>{{ prepods.sums.v_n_stavka_sum }}</td>
+                                <td>{{ prepods.sums.v_n_p_stavka_sum }} ({{ prepods.sums.v_n_p_ch_stavka_sum }})</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Всего</td>
+                                <td colspan="6"></td>
+                                <td colspan="2" class="center aligned">{{ prepods.sums.b_stavka }}</td>
+                                <td colspan="2" class="center aligned">{{ prepods.sums.v_stavka }}</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Всего по кафедре</td>
+                                <td colspan="6"></td>
+                                <td colspan="4" class="center aligned">{{ prepods.sums.stavka }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript" src="{% static 'js/table_sort.js' %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.ui.dropdown').each(function (i) {
+                $(this).dropdown({
+                    clearable: true, onChange: function (val, text, $choice) {
+                        var url = '/disciplines/shtat-raspisanie/?fakultet='+val
+                        $.get(url, function (data) {
+                            $('#table-container').replaceWith($(data).find('#table-container'))
+                            window.history.replaceState(null, null, url)
+                        })
+                    }
+                })
+                $(this).dropdown('set selected', $(this).attr('data-preselect'))
+            })
+            $('a.download').click(function () {
+                var fakultet = ''
+                if (window.location.href.includes('?'))
+                 fakultet = window.location.href.split('?')[1]
+                window.location.href = $(this).attr('href') + '&' + fakultet
+                return false
+            })
+        })
+    </script>
+{% endblock %}

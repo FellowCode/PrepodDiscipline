@@ -44,9 +44,8 @@
                                 </a>
                             </div>
                             <div class="sixteen wide">
-                                <a id="download-shtat-rasp"
-                                   class="search-papers massive ui primary button {% if dis_errors %}disabled{% endif %}">
-                                    Выгрузить штатное расписание
+                                <a href="{% url 'disciplines:shtat_rasp' %}" class="search-papers massive ui primary button {% if dis_errors %}disabled{% endif %}">
+                                    Штатное расписание
                                 </a>
                             </div>
                         {% endif %}
@@ -65,23 +64,9 @@
             </div>
         </div>
     </div>
-    <div class="ui modal mini">
-        <div class="header">Выберите формат</div>
-        <div class="content no-shadow">
-            <p>Выгрузка штатного расписания</p>
-        </div>
-        <div class="actions">
-            <a href="{% url 'main:download_shtat_rasp' %}?type=word" class="ui approve button primary">Word</a>
-            <a href="{% url 'main:download_shtat_rasp' %}?type=excel" class="ui approve button primary">Excel</a>
-            <div class="ui cancel button">Отмена</div>
-        </div>
-    </div>
 {% endblock %}
 {% block script %}
     <script type="text/javascript">
         $('.ui.checkbox').checkbox();
-        $('#download-shtat-rasp').click(function () {
-            $('.ui.modal').modal('show')
-        })
     </script>
 {% endblock %}

@@ -7,7 +7,7 @@ from Disciplines.models import *
 from utils.decorators import make_async
 from queue import LifoQueue
 from time import sleep
-from .shortcuts import get_group_nagruzki, annotate_pochasovka, annotate_group_nagruzki
+from .shortcuts import get_group_nagruzki, annotate_pochasovka, annotate_group_nagruzki, get_shtat_rasp
 
 CELL_NAMES = ['code', 'form', 'shifr', 'name', 'fakultet', 'specialnost', 'kurs', 'semestr', 'period', 'nedeli',
               'trudoemkost', 'chas_v_nedelu', 'srs', 'chas_po_planu', 'student', 'group', 'podgroup', 'lk', 'pr',
@@ -165,72 +165,40 @@ def create_prep_ds_xls(prepod):
     return '/' + url, filename
 
 
-def excel_shtat_rasp(request):
-    nagruzki_budget = get_group_nagruzki(request, vne_budget=False)
-    nagruzki_budget = annotate_pochasovka(nagruzki_budget)
-    nagruzki_vnebudget = get_group_nagruzki(request, vne_budget=True)
-    nagruzki_vnebudget = annotate_pochasovka(nagruzki_vnebudget)
-    nagruzki = annotate_group_nagruzki(nagruzki_budget, nagruzki_vnebudget)
-
+def excel_shtat_rasp(request, fakultet_id=None, _all=False):
+    if fakultet_id == '':
+        fakultet_id = None
+    fakultet = Fakultet.objects.get_or_none(id=fakultet_id)
+    prepods = get_shtat_rasp(request, fakultet, _all)
     rb = xlrd.open_workbook('static/files/st_r.xls', formatting_info=True)
     wb = copy(rb)
     sheet = wb.get_sheet(0)
-    i = 0
-    n_stavka_sum = 0
-    n_p_stavka_sum = 0
-    n_p_ch_stavka_sum = 0
-    v_n_stavka_sum = 0
-    v_n_p_stavka_sum = 0
-    v_n_p_ch_stavka_sum = 0
-    for id, prepod in nagruzki.items():
-        row = i + 12
-        n_stavka_sum += prepod.get('n_stavka', 0)
-        n_p_stavka_sum += prepod.get('pochas_stavka', 0)
-        n_p_ch_stavka_sum += prepod.get('sum_p', 0)
-        v_n_stavka_sum += prepod.get('vnebudget_stavka', 0)
-        v_n_p_stavka_sum += prepod.get('vnebudget_p_stavka', 0)
-        v_n_p_ch_stavka_sum += prepod.get('sum_p_vnebudget', 0)
 
-        setOutCell(sheet, row, 0, i + 1)
-        setOutCell(sheet, row, 1, prepod['prepod__dolzhnost'])
-        setOutCell(sheet, row, 2, Prepod.get_display_value('PKGD', prepod['prepod__pkgd']))
-        setOutCell(sheet, row, 3, prepod['prepod__kv_uroven'])
-        if prepod['prepod__srok_izbr']:
-            setOutCell(sheet, row, 4, prepod['prepod__srok_izbr'].strftime('%d.%m.%Y'))
-        setOutCell(sheet, row, 5, prepod['prepod__fio'])
-        st_zv = []
-        if prepod['prepod__uch_stepen']:
-            st_zv.append(prepod['prepod__uch_stepen'])
-        if prepod['prepod__uch_zvanie']:
-            st_zv.append(Prepod.get_display_value('UCH_ZVANIE', prepod['prepod__uch_zvanie']))
-        setOutCell(sheet, row, 6, ', '.join(st_zv))
-        if prepod['prepod__dogovor']:
-            setOutCell(sheet, row, 7, 'Договор')
-        if prepod.get('n_stavka') and prepod['n_stavka'] > 0:
-            setOutCell(sheet, row, 8, prepod['n_stavka'])
-        if prepod.get('pochas_stavka') and prepod['pochas_stavka'] > 0:
-            setOutCell(sheet, row, 9, f"{prepod['pochas_stavka']}\n({prepod['sum_p']})")
-        if prepod.get('vnebudget_stavka') and prepod['vnebudget_stavka'] > 0:
-            setOutCell(sheet, row, 10, prepod['vnebudget_stavka'])
-        if prepod.get('vnebudget_p_stavka') and prepod['vnebudget_p_stavka'] > 0:
-            setOutCell(sheet, row, 11, f"{prepod['vnebudget_p_stavka']}\n({prepod['sum_p_vnebudget']})")
-        i += 1
+    for i, row in enumerate(prepods['rows']):
+        setOutCell(sheet, row + 14, 0, i + 1)
+        for j, col in enumerate(row):
+            setOutCell(sheet, row + 14, j + 1, col)
 
-    setOutCell(sheet, 99, 8, n_stavka_sum)
-    setOutCell(sheet, 99, 9, f"{n_p_stavka_sum}\n({n_p_ch_stavka_sum})")
-    setOutCell(sheet, 99, 10, v_n_stavka_sum)
-    setOutCell(sheet, 99, 11, f"{v_n_p_stavka_sum}\n({v_n_p_ch_stavka_sum})")
-    setOutCell(sheet, 100, 8, n_stavka_sum + n_p_stavka_sum)
-    setOutCell(sheet, 100, 10, v_n_stavka_sum + v_n_p_stavka_sum)
-    setOutCell(sheet, 101, 8, n_stavka_sum + n_p_stavka_sum + v_n_stavka_sum + v_n_p_stavka_sum)
+    setOutCell(sheet, 99, 8, prepods['sums']['n_stavka_sum'])
+    setOutCell(sheet, 99, 9, f"{prepods['sums']['n_p_stavka_sum']}\n({prepods['sums']['n_p_ch_stavka_sum']})")
+    setOutCell(sheet, 99, 10, prepods['sums']['v_n_stavka_sum'])
+    setOutCell(sheet, 99, 11, f"{prepods['sums']['v_n_p_stavka_sum']}\n({prepods['sums']['v_n_p_ch_stavka_sum']})")
+    setOutCell(sheet, 100, 8, prepods['sums']['n_stavka_sum'] + prepods['sums']['n_p_stavka_sum'])
+    setOutCell(sheet, 100, 10, prepods['sums']['v_n_stavka_sum'] + prepods['sums']['v_n_p_stavka_sum'])
+    setOutCell(sheet, 101, 8, prepods['sums']['n_stavka_sum'] + prepods['sums']['n_p_stavka_sum'] + prepods['sums']['v_n_stavka_sum'] + prepods['sums']['v_n_p_stavka_sum'])
 
     if not os.path.exists(f'tmp/xls/{request.user.id}'):
         os.makedirs(f'tmp/xls/{request.user.id}')
-    if request.user.prepod.count() > 0:
+
+    if not request.user.is_superuser and not _all:
         kafedra = request.user.prepod.first().kafedra.name
     else:
-        kafedra = 'Admin'
-    filename = f'{kafedra} - штатное расписание.xls'
+        kafedra = 'Все кафедры'
+
+    if fakultet:
+        filename = f'{fakultet.name} - штатное расписание.xls'
+    else:
+        filename = f'{kafedra} - штатное расписание.xls'
     path = f'tmp/xls/{request.user.id}/{filename}'
     wb.save(path)
 
