@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+
 from django.conf import settings
 import xlrd, xlwt
 from xlutils.copy import copy
@@ -70,7 +72,6 @@ def parse_xls_disciplines(filename):
     sheet = rb.sheet_by_index(0)
     new_disciplines_id = []
     delete_disciplines_id = list(Discipline.objects.all().values_list('id', flat=True))
-    print(delete_disciplines_id)
     global upload_progress
     for rownum in range(1, sheet.nrows):
         if sheet.row_values(rownum)[0] == '':
@@ -80,6 +81,8 @@ def parse_xls_disciplines(filename):
             if i < len(CELL_NAMES):
                 if CELL_NAMES[i] in FK:
                     related = FK[CELL_NAMES[i]].objects.get_or_new(name=val)
+                    if CELL_NAMES[i] == 'kafedra':
+                        related.fakultet = d.fakultet
                     related.save()
                     setattr(d, CELL_NAMES[i], related)
                 else:
@@ -122,9 +125,11 @@ def create_disciplines_xls():
     wb.save('static/files/disciplines.xls')
 
 
-def create_prep_ds_xls(prepod):
-    CELL_NAMES = ['name', 'spec_and_form', 'kurs', 'group_podgroup', 'student', 'trudoemkost',
-                  'audit_chasov', 'srs', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet',
+def create_prep_cart_xls(user, prepod, _type, stavka):
+    if type(stavka) == str:
+        stavka = stavka.split('\n')[0]
+    CELL_NAMES = ['dis:name', 'dis:spec_and_form', 'dis:kurs', 'dis:group_podgroup', 'student', 'dis:trudoemkost',
+                  'dis:audit_chasov', 'dis:srs', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet',
                   'ekzamen', 'kontr_raboti', 'kr_kp', 'vkr', 'pr_ped', 'pr_dr', 'gak',
                   'aspirantura', 'rukovodstvo', 'dop_chasi', 'summary']
 
@@ -132,37 +137,73 @@ def create_prep_ds_xls(prepod):
     wb = copy(rb)
     sheet = wb.get_sheet(0)
     setOutCell(sheet, 6, 1, f'{prepod.last_name} {prepod.first_name} {prepod.surname}')
-    setOutCell(sheet, 6, 13, f'{prepod.dolzhnost.name}, {prepod.kv_uroven}')
-    setOutCell(sheet, 7, 14, prepod.n_stavka)
+    setOutCell(sheet, 6, 13, f'{prepod.dolzhnost}, {prepod.kv_uroven}')
+    setOutCell(sheet, 7, 14, stavka)
+    setOutCell(sheet, 7, 18, 'бюджет')
 
-    ds = prepod.disciplines.all()
+    ds = prepod.nagruzki.filter(archive=None)
+
+    if _type == 'b':
+        ds = ds.exclude(Q(discipline__form__name__contains='_В') | Q(pochasovka=True))
+        setOutCell(sheet, 7, 18, 'бюджет')
+    elif _type == 'b_p':
+        ds = ds.exclude(Q(discipline__form__name__contains='_В') | Q(pochasovka=False))
+        setOutCell(sheet, 7, 18, 'бюджет')
+    elif _type == 'vb':
+        ds = ds.filter(discipline__form__name__contains='_В', pochasovka=False)
+        setOutCell(sheet, 7, 18, 'внебюджет')
+    elif _type == 'vb_p':
+        ds = ds.filter(discipline__form__name__contains='_В', pochasovka=True)
+        setOutCell(sheet, 7, 18, 'внебюджет')
+
     osen = 0
     vesna = 0
+    year = 0
 
     for d in ds:
-        print(d.period)
         for j, key in enumerate(CELL_NAMES):
-            val = getattr(d, key)
+            if 'dis:' in key:
+                val = getattr(d.discipline, key.split(':')[1])
+            else:
+                val = getattr(d, key)
             if callable(val):
                 val = val()
             if key in FK:
                 val = val.name
-            if d.period == 'осенний':
+            if d.discipline.period == 'осенний':
                 setOutCell(sheet, osen + 10, j + 1, val)
-            else:
+            elif d.discipline.period == 'весенний':
                 setOutCell(sheet, vesna + 72, j + 1, val)
+            else:
+                setOutCell(sheet, year + 132, j + 1, val)
 
-        if d.period == 'осенний':
+        if d.discipline.period == 'осенний':
             setOutCell(sheet, osen + 10, 0, osen + 1)
             osen += 1
-        else:
+        elif d.discipline.period == 'весенний':
             setOutCell(sheet, vesna + 72, 0, vesna + 1)
             vesna += 1
+        else:
+            setOutCell(sheet, year + 132, 0, year + 1)
+            year += 1
 
-    filename = f'{prepod.fio()} - дисциплины.xls'
-    url = f'static/files/{filename}'
-    wb.save(url)
-    return '/' + url, filename
+    if not os.path.exists(f'tmp/xls/{user.id}'):
+        os.makedirs(f'tmp/xls/{user.id}')
+
+    if _type == 'b':
+        filename = f"Карточка {prepod.fio} ст_{str(stavka)}_{datetime.now().strftime('%d.%m.%Y')}б.xls"
+    elif _type == 'b_p':
+        filename = f"Карточка {prepod.fio} ст_{str(stavka)}_П_{datetime.now().strftime('%d.%m.%Y')}б.xls"
+    elif _type == 'vb':
+        filename = f"Карточка {prepod.fio} ст_{str(stavka)}_{datetime.now().strftime('%d.%m.%Y')}в.xls"
+    elif _type == 'vb_p':
+        filename = f"Карточка {prepod.fio} ст_{str(stavka)}_П_{datetime.now().strftime('%d.%m.%Y')}в.xls"
+    else:
+        filename = f"Карточка {prepod.fio} ст_{str(stavka)}_{datetime.now().strftime('%d.%m.%Y')}.xls"
+
+    path = f'tmp/xls/{user.id}/{filename}'
+    wb.save(path)
+    return path
 
 
 def excel_shtat_rasp(request, fakultet_id=None, _all=False):
@@ -173,11 +214,12 @@ def excel_shtat_rasp(request, fakultet_id=None, _all=False):
     rb = xlrd.open_workbook('static/files/st_r.xls', formatting_info=True)
     wb = copy(rb)
     sheet = wb.get_sheet(0)
-
-    for i, row in enumerate(prepods['rows']):
-        setOutCell(sheet, row + 14, 0, i + 1)
+    i = 0
+    for id, row in prepods['rows'].items():
+        setOutCell(sheet, i + 12, 0, i + 1)
         for j, col in enumerate(row):
-            setOutCell(sheet, row + 14, j + 1, col)
+            setOutCell(sheet, i + 12, j + 1, col)
+        i += 1
 
     setOutCell(sheet, 99, 8, prepods['sums']['n_stavka_sum'])
     setOutCell(sheet, 99, 9, f"{prepods['sums']['n_p_stavka_sum']}\n({prepods['sums']['n_p_ch_stavka_sum']})")
@@ -203,3 +245,5 @@ def excel_shtat_rasp(request, fakultet_id=None, _all=False):
     wb.save(path)
 
     return path
+
+

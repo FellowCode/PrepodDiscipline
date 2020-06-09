@@ -105,13 +105,12 @@ def get_group_nagruzki(request, vne_budget, fakultet=None, _all=False):
         nagruzki = Nagruzka.objects.filter(archive=None).exclude(discipline__form__name__contains='_В').all()
     if fakultet:
         nagruzki = nagruzki.filter(discipline__fakultet=fakultet)
-    elif not request.user.is_superuser or _all:
+    elif not request.user.is_superuser and not _all:
         nagruzki = nagruzki.filter(discipline__kafedra=request.user.prepod.first().kafedra)
     group_nagruzki = nagruzki.values('prepod__id', 'prepod__fio', 'prepod__dolzhnost',
                                      'prepod__kv_uroven', 'prepod__pkgd', 'prepod__uch_stepen', 'prepod__uch_zvanie',
                                      'prepod__srok_izbr', 'prepod__dogovor', 'n_stavka', 'pochasovka',
-                                     'prepod__chasov_stavki').order_by('prepod__fio') \
-        .order_by('-prepod__kv_uroven', 'prepod__fio').annotate(Sum('summary'))
+                                     'prepod__chasov_stavki').order_by('-prepod__kv_uroven', 'prepod__fio').annotate(Sum('summary'))
     return group_nagruzki
 
 
@@ -163,7 +162,7 @@ def get_shtat_rasp(request, fakultet=None, _all=False):
 
     p = {'sums': {'n_stavka_sum': 0, 'n_p_stavka_sum': 0, 'n_p_ch_stavka_sum': 0, 'v_n_stavka_sum': 0,
                   'v_n_p_stavka_sum': 0, 'v_n_p_ch_stavka_sum': 0},
-         'rows': []}
+         'rows': {}}
 
     for id, prepod in prepods.items():
         p['sums']['n_stavka_sum'] += prepod.get('n_stavka', 0)
@@ -197,9 +196,14 @@ def get_shtat_rasp(request, fakultet=None, _all=False):
             r[9] = prepod['vnebudget_stavka']
         if prepod.get('vnebudget_p_stavka') and prepod['vnebudget_p_stavka'] > 0:
             r[10] = f"{prepod['vnebudget_p_stavka']}\n({prepod.get('sum_p_vnebudget', 0)})"
-        p['rows'].append(r)
+        p['rows'][id] = r
 
     p['sums']['b_stavka'] = p['sums']['n_stavka_sum'] + p['sums']['n_p_stavka_sum']
     p['sums']['v_stavka'] = p['sums']['v_n_stavka_sum'] + p['sums']['v_n_p_stavka_sum']
     p['sums']['stavka'] = p['sums']['b_stavka'] + p['sums']['v_stavka']
+
     return p
+
+
+def create_otchet_archive():
+    pass

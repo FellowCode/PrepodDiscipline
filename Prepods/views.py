@@ -1,14 +1,16 @@
+from datetime import datetime
+
 from django.contrib.auth.decorators import login_required
-from django.db.models import F
-from django.http import JsonResponse, Http404
+from django.db.models import F, Count
+from django.http import JsonResponse, Http404, FileResponse
 from django.shortcuts import render
 
 from Prepods.models import Prepod
 from Disciplines.models import Discipline, Kafedra
 from utils.decorators import prepod_only
-from utils.shortcuts import iredirect
+from utils.shortcuts import iredirect, check_discipline_errors, get_shtat_rasp
 
-from utils.xls import create_prep_ds_xls
+from utils.xls import create_prep_cart_xls, Q
 from Accounts.models import User
 from .forms import *
 
@@ -22,7 +24,9 @@ def prepods_list(request):
         return iredirect('main:index')
     else:
         prepods = Prepod.objects.filter(kafedra=request.user.prepod.first().kafedra)
-    return render(request, 'Prepods/List.html', {'prepods': prepods})
+    prepods = prepods.annotate(num_nagruzki=Count('nagruzki', filter=Q(nagruzki__archive=None)))
+
+    return render(request, 'Prepods/List.html', {'prepods': prepods, 'dis_errors': check_discipline_errors(request)})
 
 @login_required
 @prepod_only
@@ -45,14 +49,43 @@ def prepod_disciplines(request, id):
         disciplines = prepod.disciplines.all()
     return render(request, 'Prepods/Disciplines.html', {'prepod': prepod, 'disciplines': disciplines})
 
+
 @login_required
 @prepod_only
-def prep_ds_download(request, id):
-    prepod = Prepod.objects.get_or_404(id=id)
-    if request.is_ajax() and request.method == 'POST' and (request.user.is_superuser or request.user.prepod == prepod):
-        url, filename = create_prep_ds_xls(prepod)
-        return JsonResponse({'status': 'OK', 'url': url, 'filename': filename})
-    raise Http404
+def prep_cart_download(request):
+    prepod = Prepod.objects.get_or_404(id=request.GET.get('id'))
+    path = create_prep_cart_xls(request.user, prepod, _type=request.GET.get('type'), stavka=request.GET.get('stavka'))
+    return FileResponse(open(path, 'rb'))
+
+
+@login_required
+@prepod_only
+def download_prepod_karts(request):
+    import os
+    import zipfile
+    zip_path = 'tmp/zip/'
+    filename = f'{request.user.id}-PrepodKarts.zip'
+    if not os.path.exists(zip_path):
+        os.makedirs(zip_path)
+    zip_path += filename
+    zipf = zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED)
+    prepods = get_shtat_rasp(request)
+    for id, prepod in prepods['rows'].items():
+        prepod_obj = Prepod.objects.get_or_none(id=id)
+        if prepod[7] != '':
+            path = create_prep_cart_xls(request.user, prepod_obj, _type='b', stavka=prepod[7])
+            zipf.write(path, path.split('/')[-1])
+        if prepod[8] != '':
+            path = create_prep_cart_xls(request.user, prepod_obj, _type='b_p', stavka=prepod[8])
+            zipf.write(path, path.split('/')[-1])
+        if prepod[9] != '':
+            path = create_prep_cart_xls(request.user, prepod_obj, _type='vb', stavka=prepod[9])
+            zipf.write(path, path.split('/')[-1])
+        if prepod[10] != '':
+            path = create_prep_cart_xls(request.user, prepod_obj, _type='vb_p', stavka=prepod[10])
+            zipf.write(path, path.split('/')[-1])
+    zipf.close()
+    return FileResponse(open(zip_path, 'rb'), filename=f"Карточки преподавателей {request.user.prepod.first().kafedra.name} {datetime.now().strftime('%d.%m.%Y')}.zip")
 
 
 @login_required

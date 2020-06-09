@@ -13,12 +13,12 @@ def word_shtat_rasp(request, fakultet_id=None, _all=False):
     fakultet = Fakultet.objects.get_or_none(id=fakultet_id)
     prepods = get_shtat_rasp(request, fakultet, _all)
     doc = Document('static/files/Shtat_raspisanie.docx')
-    print(doc.tables)
-
-    for i, row in enumerate(prepods['rows']):
+    i = 0
+    for id, row in prepods['rows'].items():
         doc.tables[0].cell(i+14, 0).text = str(i+1)
         for j, col in enumerate(row):
             doc.tables[0].cell(i + 14, j+1).text = str(col)
+        i+=1
 
 
     doc.tables[0].cell(34, 8).text = str(prepods['sums']['n_stavka_sum'])

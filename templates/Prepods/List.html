@@ -30,7 +30,6 @@
                                 <th>Должность</th>
                                 <th>Кв. уровень</th>
                                 <th>Часов ставки</th>
-                                <th>Дисциплины</th>
                                 <th>Права</th>
                             </tr>
                             </thead>
@@ -45,9 +44,6 @@
                                     <td data-label="Должность">{{ prepod.dolzhnost }}</td>
                                     <td data-label="Кв. уровень">{{ prepod.kv_uroven }}</td>
                                     <td data-label="Часов ставки">{{ prepod.chasov_stavki }}</td>
-                                    <td data-label="Дисциплины"><a
-                                            href="{% iurl 'disciplines:list' get_prepod='prepod.id' %}">Дисциплины</a></td>
-                                    <td data-label="Права">{{ prepod.get_prava_display }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>

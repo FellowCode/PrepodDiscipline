@@ -56,8 +56,18 @@ class Kafedra(models.Model):
 
     name = models.CharField(max_length=256, unique=True)
 
+    fakultet = models.ForeignKey('Fakultet', on_delete=models.CASCADE, null=True, blank=True)
+
     def __str__(self):
         return self.name
+
+
+    def save(self, **kwargs):
+        if not self.fakultet:
+            discipline = Discipline.objects.filter(kafedra__id=self.id).first()
+            if discipline:
+                self.fakultet = discipline.fakultet
+        super(Kafedra, self).save()
 
     class Meta:
         verbose_name = 'Кафедра'
@@ -143,7 +153,7 @@ class Discipline(models.Model):
 
     dop_chasi = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Доп. часы')
 
-    kafedra = models.ForeignKey(Kafedra, on_delete=models.SET_NULL, null=True, verbose_name='Кафедра')
+    kafedra = models.ForeignKey(Kafedra, on_delete=models.SET_NULL, null=True, verbose_name='Кафедра', related_name='disciplines')
 
     potok = models.ForeignKey(Potok, on_delete=models.SET_NULL, null=True, verbose_name='Поток')
 
