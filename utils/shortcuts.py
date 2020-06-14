@@ -146,7 +146,7 @@ def annotate_group_nagruzki(group_nagruzki_budget, group_nagruzki_vnebudget):
         group_nagruzki[key] = nagruzka
         group_nagruzki[key]['vnebudget_stavka'] = nagruzka['n_stavka']
         group_nagruzki[key]['vnebudget_p_stavka'] = nagruzka.get('pochas_stavka', 0)
-        group_nagruzki[key]['sum_p_vnebudget'] = nagruzka['sum_p']
+        group_nagruzki[key]['sum_p_vnebudget'] = nagruzka.get('sum_p', 0)
         group_nagruzki[key]['n_stavka'] = 0
         group_nagruzki[key]['pochas_stavka'] = 0
         group_nagruzki[key]['sum_p'] = 0
