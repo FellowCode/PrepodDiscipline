@@ -11,7 +11,7 @@ from utils.word import word_shtat_rasp
 from .models import Discipline, Nagruzka, Archive, Fakultet, Kafedra
 from Prepods.models import Prepod
 
-from utils.xls import handle_upload_disciplines, create_disciplines_xls, excel_shtat_rasp
+from utils.xls import handle_upload_disciplines, create_disciplines_xls, excel_shtat_rasp, otvet_fakultetu
 from utils import xls
 
 
@@ -267,4 +267,13 @@ def download_shtatnoe_raspisanie(request):
             path = excel_shtat_rasp(request, fakultet_id=fakultet_id, _all=True)
         return FileResponse(open(path, 'rb'))
     return iredirect('main:index')
+
+
+@login_required
+@prepod_only
+def download_otvet_fakultetu(request):
+    if request.user.is_superuser:
+        return HttpResponse()
+    path = otvet_fakultetu(request)
+    return FileResponse(open(path, 'rb'))
 

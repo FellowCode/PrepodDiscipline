@@ -9,6 +9,7 @@ urlpatterns = [
     path('download/', disciplines_download, name='download'),
     path('shtat-raspisanie/download/', download_shtatnoe_raspisanie, name='download_shtat_rasp'),
     path('shtat-raspisanie/', shtat_raspisanie, name='shtat_rasp'),
+    path('otvet-fakultetu/download/', download_otvet_fakultetu, name='download_otvet_fakultetu'),
     path('<dis_id>/nagruzka/', discipline_nagruzka, name='nagruzka'),
     path('<dis_id>/nagruzka/save/', save_nagruzka, name='save_nagruzka'),
     path('<dis_id>/nagruzka/edit/', edit_nagruzka, name='edit_nagruzka'),

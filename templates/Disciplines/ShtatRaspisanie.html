@@ -18,6 +18,8 @@
                                class="large ui primary button download">Скачать Excel</a>
                             <a href="{% url 'disciplines:download_shtat_rasp' %}?type=excel-all"
                                class="large ui primary button download">Все кафедры Excel</a>
+                            <a href="{% url 'disciplines:download_otvet_fakultetu' %}"
+                               class="large ui primary button download hide">Ответ факультету</a>
                             <a href="{% url 'prepods:download_prepod_karts' %}?type=excel-all"
                                class="large ui primary button download">Все карточки архивом</a>
                         </div>
@@ -136,10 +138,11 @@
             })
             $('a.download').click(function () {
                 var fakultet = ''
-                if (window.location.href.includes('?'))
+                if (window.location.href.includes('?')) {
                     fakultet = window.location.href.split('?')[1]
-                window.location.href = $(this).attr('href') + '&' + fakultet
-                return false
+                    window.location.href = $(this).attr('href') + '&' + fakultet
+                    return false
+                }
             })
             $('tr.prepod').click(function () {
                 var id = $(this).attr('data-id')

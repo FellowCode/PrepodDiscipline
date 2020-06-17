@@ -72,17 +72,20 @@ def download_prepod_karts(request):
     prepods = get_shtat_rasp(request)
     for id, prepod in prepods['rows'].items():
         prepod_obj = Prepod.objects.get_or_none(id=id)
-        if prepod[7] != '':
-            path = create_prep_cart_xls(request.user, prepod_obj, _type='b', stavka=prepod[7])
+        for ir in range(7, 11, 1):
+            if prepod[ir] == '':
+                prepod[ir] = 0
+        path = create_prep_cart_xls(request.user, prepod_obj, _type='b', stavka=prepod[7])
+        if path:
             zipf.write(path, path.split('/')[-1])
-        if prepod[8] != '':
-            path = create_prep_cart_xls(request.user, prepod_obj, _type='b_p', stavka=prepod[8])
+        path = create_prep_cart_xls(request.user, prepod_obj, _type='b_p', stavka=prepod[8])
+        if path:
             zipf.write(path, path.split('/')[-1])
-        if prepod[9] != '':
-            path = create_prep_cart_xls(request.user, prepod_obj, _type='vb', stavka=prepod[9])
+        path = create_prep_cart_xls(request.user, prepod_obj, _type='vb', stavka=prepod[9])
+        if path:
             zipf.write(path, path.split('/')[-1])
-        if prepod[10] != '':
-            path = create_prep_cart_xls(request.user, prepod_obj, _type='vb_p', stavka=prepod[10])
+        path = create_prep_cart_xls(request.user, prepod_obj, _type='vb_p', stavka=prepod[10])
+        if path:
             zipf.write(path, path.split('/')[-1])
     zipf.close()
     return FileResponse(open(zip_path, 'rb'), filename=f"Карточки преподавателей {request.user.prepod.first().kafedra.name} {datetime.now().strftime('%d.%m.%Y')}.zip")

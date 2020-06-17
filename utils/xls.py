@@ -41,6 +41,7 @@ def setOutCell(outSheet, row, col, value):
         newCell = _getOutCell(outSheet, col, row)
         if newCell:
             newCell.xf_idx = previousCell.xf_idx
+
     # END HACK
 
 
@@ -72,16 +73,25 @@ def parse_xls_disciplines(filename):
     sheet = rb.sheet_by_index(0)
     new_disciplines_id = []
     delete_disciplines_id = list(Discipline.objects.all().values_list('id', flat=True))
+    delete_objects = {'form': list(DisciplineForm.objects.all().values_list('id', flat=True)),
+                      'fakultet': list(Fakultet.objects.all().values_list('id', flat=True)),
+                      'kafedra': list(Kafedra.objects.all().values_list('id', flat=True)),
+                      'potok': list(Potok.objects.all().values_list('id', flat=True)),
+                      'specialnost': list(Specialnost.objects.all().values_list('id', flat=True))}
     global upload_progress
     for rownum in range(1, sheet.nrows):
         if sheet.row_values(rownum)[0] == '':
             break
         d = Discipline.objects.get_or_new(code=int(sheet.row_values(rownum)[0]))
         for i, val in enumerate(sheet.row_values(rownum)):
+            if type(val) == str:
+                val = val.strip()
             if i < len(CELL_NAMES):
                 if CELL_NAMES[i] in FK:
                     related = FK[CELL_NAMES[i]].objects.get_or_new(name=val)
-                    if CELL_NAMES[i] == 'kafedra':
+                    if related.id in delete_objects[CELL_NAMES[i]]:
+                        delete_objects[CELL_NAMES[i]].remove(related.id)
+                    if CELL_NAMES[i] == 'kafedra' and d.fakultet.name != 'НЕТ':
                         related.fakultet = d.fakultet
                     related.save()
                     setattr(d, CELL_NAMES[i], related)
@@ -98,6 +108,9 @@ def parse_xls_disciplines(filename):
             delete_disciplines_id.remove(d.id)
         if rownum % 30 == 0:
             upload_progress = f'{rownum}/{sheet.nrows} {int(rownum / sheet.nrows * 100)} %'
+
+    for key, id_list in delete_objects.items():
+        FK[key].objects.filter(id__in=id_list).delete()
 
     while len(delete_disciplines_id) > 500:
         Discipline.objects.filter(id__in=delete_disciplines_id[:500]).delete()
@@ -132,6 +145,13 @@ def create_prep_cart_xls(user, prepod, _type, stavka):
                   'dis:audit_chasov', 'dis:srs', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet',
                   'ekzamen', 'kontr_raboti', 'kr_kp', 'vkr', 'pr_ped', 'pr_dr', 'gak',
                   'aspirantura', 'rukovodstvo', 'dop_chasi', 'summary']
+    SUM_CELLS = ['dis:trudoemkost', 'dis:audit_chasov', 'dis:srs', 'lk', 'pr', 'lr', 'k_tek', 'k_ekz', 'zachet',
+                 'ekzamen', 'kontr_raboti', 'kr_kp', 'vkr', 'pr_ped', 'pr_dr', 'gak',
+                 'aspirantura', 'rukovodstvo', 'dop_chasi', 'summary']
+
+    ds = prepod.nagruzki.filter(archive=None)
+    if ds.count() == 0:
+        return None
 
     rb = xlrd.open_workbook('static/files/prep_ds_shablon.xls', formatting_info=True)
     wb = copy(rb)
@@ -140,8 +160,6 @@ def create_prep_cart_xls(user, prepod, _type, stavka):
     setOutCell(sheet, 6, 13, f'{prepod.dolzhnost}, {prepod.kv_uroven}')
     setOutCell(sheet, 7, 14, stavka)
     setOutCell(sheet, 7, 18, 'бюджет')
-
-    ds = prepod.nagruzki.filter(archive=None)
 
     if _type == 'b':
         ds = ds.exclude(Q(discipline__form__name__contains='_В') | Q(pochasovka=True))
@@ -160,6 +178,10 @@ def create_prep_cart_xls(user, prepod, _type, stavka):
     vesna = 0
     year = 0
 
+    sums_osen = [0] * len(SUM_CELLS)
+    sums_vesna = [0] * len(SUM_CELLS)
+    sums_year = [0] * len(SUM_CELLS)
+
     for d in ds:
         for j, key in enumerate(CELL_NAMES):
             if 'dis:' in key:
@@ -170,12 +192,22 @@ def create_prep_cart_xls(user, prepod, _type, stavka):
                 val = val()
             if key in FK:
                 val = val.name
+            if key in SUM_CELLS:
+                sum_i = SUM_CELLS.index(key)
+            else:
+                sum_i = None
             if d.discipline.period == 'осенний':
                 setOutCell(sheet, osen + 10, j + 1, val)
+                if sum_i:
+                    sums_osen[sum_i] += float(val)
             elif d.discipline.period == 'весенний':
                 setOutCell(sheet, vesna + 72, j + 1, val)
+                if sum_i:
+                    sums_vesna[sum_i] += float(val)
             else:
                 setOutCell(sheet, year + 132, j + 1, val)
+                if sum_i:
+                    sums_year[sum_i] += float(val)
 
         if d.discipline.period == 'осенний':
             setOutCell(sheet, osen + 10, 0, osen + 1)
@@ -186,6 +218,15 @@ def create_prep_cart_xls(user, prepod, _type, stavka):
         else:
             setOutCell(sheet, year + 132, 0, year + 1)
             year += 1
+
+    for n, sum in enumerate(sums_osen):
+        setOutCell(sheet, 60, n + 6, sum)
+    for n, sum in enumerate(sums_vesna):
+        setOutCell(sheet, 122, n + 6, sum)
+    for n, sum in enumerate(sums_year):
+        setOutCell(sheet, 182, n + 6, sum)
+
+    # sheet.getCells().deleteRows(9+osen, 50-osen, True)
 
     if not os.path.exists(f'tmp/xls/{user.id}'):
         os.makedirs(f'tmp/xls/{user.id}')
@@ -203,6 +244,7 @@ def create_prep_cart_xls(user, prepod, _type, stavka):
 
     path = f'tmp/xls/{user.id}/{filename}'
     wb.save(path)
+    # remove_rows(path, 9 + osen, 50 - osen)
     return path
 
 
@@ -227,7 +269,9 @@ def excel_shtat_rasp(request, fakultet_id=None, _all=False):
     setOutCell(sheet, 99, 11, f"{prepods['sums']['v_n_p_stavka_sum']}\n({prepods['sums']['v_n_p_ch_stavka_sum']})")
     setOutCell(sheet, 100, 8, prepods['sums']['n_stavka_sum'] + prepods['sums']['n_p_stavka_sum'])
     setOutCell(sheet, 100, 10, prepods['sums']['v_n_stavka_sum'] + prepods['sums']['v_n_p_stavka_sum'])
-    setOutCell(sheet, 101, 8, prepods['sums']['n_stavka_sum'] + prepods['sums']['n_p_stavka_sum'] + prepods['sums']['v_n_stavka_sum'] + prepods['sums']['v_n_p_stavka_sum'])
+    setOutCell(sheet, 101, 8,
+               prepods['sums']['n_stavka_sum'] + prepods['sums']['n_p_stavka_sum'] + prepods['sums']['v_n_stavka_sum'] +
+               prepods['sums']['v_n_p_stavka_sum'])
 
     if not os.path.exists(f'tmp/xls/{request.user.id}'):
         os.makedirs(f'tmp/xls/{request.user.id}')
@@ -247,3 +291,46 @@ def excel_shtat_rasp(request, fakultet_id=None, _all=False):
     return path
 
 
+def otvet_fakultetu(request):
+    if request.user.is_superuser:
+        return None
+
+    CELL_NAMES = ['dis:semestr', 'dis:period', 'dis:nedeli', 'dis:trudoemkost', 'dis:chas_v_nedelu', 'dis:srs',
+                  'dis:chas_po_planu', 'student', 'dis:group', 'dis:podgroup', 'lk', 'pr', 'lr', 'k_ekz',
+                  'zachet', 'ekzamen', 'kontr_raboti', 'kr_kp', 'vkr',
+                  'pr_ped', 'pr_dr', 'gak', 'aspirantura', 'rukovodstvo', 'dop_chasi', 'summary', 'prepod']
+
+    rb = xlrd.open_workbook('static/files/otvet_fakultetu.xls', formatting_info=True)
+    wb = copy(rb)
+    sheet = wb.get_sheet(0)
+
+    kafedra = request.user.prepod.first().kafedra
+    nagruzki = Nagruzka.objects.select_related('discipline').filter(archive=None, discipline__kafedra=kafedra)
+
+    style = xlwt.XFStyle()
+    borders = xlwt.Borders()
+    borders.bottom = xlwt.Borders.THIN
+    borders.top = xlwt.Borders.THIN
+    borders.left = xlwt.Borders.THIN
+    borders.right = xlwt.Borders.THIN
+    style.borders = borders
+
+    for i, nagruzka in enumerate(nagruzki):
+        for j, cell in enumerate(CELL_NAMES):
+            if 'dis:' in cell:
+                val = getattr(nagruzka.discipline, cell.split(':')[1])
+            else:
+                val = getattr(nagruzka, cell)
+            if callable(val):
+                val = val()
+            if cell == 'prepod':
+                val = val.fio
+            sheet.write(i+1, j, val, style=style)
+
+    if not os.path.exists(f'tmp/xls/{request.user.id}'):
+        os.makedirs(f'tmp/xls/{request.user.id}')
+
+    filename = f"Ответ {kafedra} факультету {kafedra.fakultet} {datetime.now().strftime('%d.%m.%Y')}.xls"
+    path = f'tmp/xls/{request.user.id}/{filename}'
+    wb.save(path)
+    return path
