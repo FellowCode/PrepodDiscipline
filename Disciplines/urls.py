@@ -10,11 +10,11 @@ urlpatterns = [
     path('shtat-raspisanie/download/', download_shtatnoe_raspisanie, name='download_shtat_rasp'),
     path('shtat-raspisanie/', shtat_raspisanie, name='shtat_rasp'),
     path('otvet-fakultetu/download/', download_otvet_fakultetu, name='download_otvet_fakultetu'),
+    path('nagruzki-list/', nagruzki_list, name='nagruzki_list'),
+    path('raspred-stavok/save/', raspred_stavok_save, name='raspred_stavok_save'),
+    path('raspred-stavok/', raspred_stavok, name='raspred_stavok'),
     path('<dis_id>/nagruzka/', discipline_nagruzka, name='nagruzka'),
     path('<dis_id>/nagruzka/save/', save_nagruzka, name='save_nagruzka'),
     path('<dis_id>/nagruzka/edit/', edit_nagruzka, name='edit_nagruzka'),
     path('<dis_id>/nagruzka/archiving/', archiving, name='archiving'),
-    path('raspred-stavok/save/', raspred_stavok_save, name='raspred_stavok_save'),
-    path('raspred-stavok/', raspred_stavok, name='raspred_stavok'),
-
 ]

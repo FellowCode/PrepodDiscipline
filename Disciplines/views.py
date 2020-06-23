@@ -8,12 +8,12 @@ from django.shortcuts import render, reverse, redirect
 from utils.decorators import prepod_only
 from utils.shortcuts import get_group_nagruzki, get_shtat_rasp, iredirect
 from utils.word import word_shtat_rasp
+from .forms import NagruzkaForm
 from .models import Discipline, Nagruzka, Archive, Fakultet, Kafedra
 from Prepods.models import Prepod
 
 from utils.xls import handle_upload_disciplines, create_disciplines_xls, excel_shtat_rasp, otvet_fakultetu
 from utils import xls
-
 
 
 @login_required
@@ -124,7 +124,14 @@ def discipline_nagruzka(request, dis_id):
 
 
 def stavka_range():
-    return [round(x * 0.05, 2) for x in range(21)]
+    stavki = [str(round(x * 0.05, 2)) for x in range(21)]
+    i = 0
+    while i < len(stavki):
+        if len(stavki[i]) < 4:
+            stavki[i] += '0'
+        stavki[i] = (stavki[i], stavki[i].replace('.', ','))
+        i += 1
+    return stavki
 
 
 @login_required
@@ -277,3 +284,31 @@ def download_otvet_fakultetu(request):
     path = otvet_fakultetu(request)
     return FileResponse(open(path, 'rb'))
 
+
+@login_required
+@prepod_only
+def nagruzki_list(request):
+    if request.method == 'POST':
+        nagruzka = Nagruzka.objects.get_or_404(id=request.POST.get('nagruzka_id'))
+        form = NagruzkaForm(request.POST, instance=nagruzka)
+        if form.is_valid():
+            form.save()
+    kafedra = request.user.prepod.first().kafedra
+    prepods = Prepod.objects.filter(kafedra=kafedra)
+    nagruzki = Nagruzka.objects.select_related('discipline').filter(discipline__kafedra=kafedra, archive=None)
+    cur_prepod = request.GET.get('prepod')
+    if cur_prepod:
+        nagruzki = nagruzki.filter(prepod=cur_prepod)
+    cur_stavka = request.GET.get('n_stavka')
+    if cur_stavka:
+        nagruzki = nagruzki.filter(n_stavka=cur_stavka)
+    cur_pochasovka = request.GET.get('pochasovka')
+    if cur_pochasovka:
+        nagruzki = nagruzki.filter(pochasovka=cur_pochasovka == 'True')
+    PER_PAGE = 150
+    page = int(request.GET.get('page', '1'))
+    pages = nagruzki.count() // PER_PAGE
+    nagruzki = nagruzki[PER_PAGE * (page - 1):PER_PAGE * (page)]
+    return render(request, 'Disciplines/NagruzkiList.html',
+                  {'nagruzki': nagruzki, 'pages': range(pages + 1), 'offset': PER_PAGE * (page - 1), 'page': page,
+                   'stavka_range': stavka_range(), 'prepods': prepods, 'cur_prepod': cur_prepod, 'cur_stavka': cur_stavka, 'cur_pochasovka': cur_pochasovka})

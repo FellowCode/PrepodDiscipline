@@ -9,12 +9,16 @@
         <div class="child-center">
             <div class="raspred-stavok cblock">
                 <div class="content">
+
+                    <h1 class="ui center aligned header">Распределение ставок {% if vne_budget %}внебюджет{% else %}
+                        бюджет{% endif %}</h1>
                     {% if vne_budget %}
                         <a href="/disciplines/raspred-stavok/" class="ui primary button large">< Бюджет</a>
                     {% else %}
-                        <a href="/disciplines/raspred-stavok/?vne_budget=True"  class="ui primary button large">< Внебюджет</a>
+                        <a href="/disciplines/raspred-stavok/?vne_budget=True" class="ui primary button large"><
+                            Внебюджет</a>
                     {% endif %}
-                    <h1 class="ui center aligned header">Распределение ставок {% if vne_budget %}внебюджет{% else %}бюджет{% endif %}</h1>
+                    <a href="{% url 'disciplines:nagruzki_list' %}" class="ui primary button large">Список нагрузок</a>
                     <div id="list-container" class="sixteen wide table-container">
                         <table class="ui sortable selectable celled table">
                             <thead>
@@ -107,13 +111,14 @@
                     {% else %}
                         var url = '/disciplines/raspred-stavok/';
                     {% endif %}
-                    $('#list-container').load(url+' table', function () {
+                    $('#list-container').load(url + ' table', function () {
                         $modal.find('.approve').removeClass('loading');
                         setupRowClick();
                         $modal.modal('close');
                     })
                 });
             }
+
             var $modal = $('.ui.modal');
             setupRowClick();
 

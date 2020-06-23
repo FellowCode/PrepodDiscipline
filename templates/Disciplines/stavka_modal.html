@@ -9,8 +9,8 @@
                     <i class="dropdown icon"></i>
                     <div class="default text"></div>
                     <div class="menu">
-                        {% for i in stavka_range %}
-                            <div class="item" data-value="{{ i }}">{{ i }}</div>
+                        {% for i, j in stavka_range %}
+                            <div class="item" data-value="{{ i }}">{{ j }}</div>
                         {% endfor %}
                     </div>
                 </div>

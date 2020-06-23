@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load modified %}
+{% load extra %}
+
+{% block title %}Список дисциплин | ПГУ им. "Шолом-Алейхема"{% endblock %}
+
+{% block content %}
+    <div class="ui container full-width">
+        <div class="child-center">
+            <div class="discipline-list cblock">
+                <div class="content">
+                    <h1 class="ui center aligned header">Список нагрузок</h1>
+                    <div class="panel">
+                        <form id="filter">
+                            <input type="hidden" name="page" value="{{ page }}">
+                            <a href="{% url 'disciplines:raspred_stavok' %}" class="ui button primary large">Распределение
+                                ставок</a>
+                            <div class="ui selection dropdown filter" data-preselect="{{ cur_prepod }}">
+                                <input type="hidden" name="prepod">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Преподаватель</div>
+                                <div class="menu">
+                                    {% for prepod in prepods %}
+                                        <div class="item" data-value="{{ prepod.id }}">{{ prepod.fio }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="ui selection dropdown filter" data-preselect="{{ cur_stavka }}"
+                                 style="min-width: 100px">
+                                <input type="hidden" name="n_stavka">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Ставка</div>
+                                <div class="menu">
+                                    {% for i, j in stavka_range %}
+                                        <div class="item" data-value="{{ i }}">{{ j }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="ui selection dropdown filter" data-preselect="{{ cur_pochasovka }}"
+                                 style="min-width: 120px">
+                                <input type="hidden" name="pochasovka">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Почасовка</div>
+                                <div class="menu">
+                                    <div class="item" data-value="True">Да</div>
+                                    <div class="item" data-value="False">Нет</div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="sixteen wide table-container">
+                        <table class="ui sortable selectable celled table tableFixHead">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Код</th>
+                                <th>Форма</th>
+                                <th>Дисциплина</th>
+                                <th>Факультет</th>
+                                <th>Преподаватель</th>
+                                <th>Ставка</th>
+                                <th>Почасовка</th>
+                                <th>Спец.</th>
+                                <th>Курс</th>
+                                <th>Сем.</th>
+                                <th>Период</th>
+                                <th>Недель</th>
+                                <th>Труд.</th>
+                                <th>В нед.</th>
+                                <th>СРС</th>
+                                <th>По плану</th>
+                                <th>Студ.</th>
+                                <th>Групп</th>
+                                <th>Подгр.</th>
+                                <th>ЛК</th>
+                                <th>ПР</th>
+                                <th>ЛР</th>
+                                <th>Зачет</th>
+                                <th>Экзамен</th>
+                                <th>Контр.р.</th>
+                                <th>КР/КП</th>
+                                <th>ВКР</th>
+                                <th>Пр.пед.</th>
+                                <th>Пр.др.</th>
+                                <th>ГАК</th>
+                                <th>Асп./Маг.</th>
+                                <th>Рук.</th>
+                                <th>Доп.ч.</th>
+                                <th>ВСЕГО</th>
+                                <th>Кафедра</th>
+                                <th>Поток</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for nagruzka in nagruzki %}
+                                <tr data-id="{{ nagruzka.id }}" data-prepod-id="{{ nagruzka.prepod.id }}"
+                                    data-stavka="{{ nagruzka.n_stavka }}" data-pochasovka="{{ nagruzka.pochasovka }}"
+                                    class="{% if nagruzka.nagruzka_count == 0 %} nagruzka-empty {% elif nagruzka.errors %} nagruzka-error {% endif %}"
+                                    style="cursor: pointer">
+                                    <td data-label="#">{{ forloop.counter|add:offset }}</td>
+                                    <td data-label="Код">{{ nagruzka.discipline.code|floatformat }}</td>
+                                    <td data-label="Форма">{{ nagruzka.discipline.form.name }}</td>
+                                    <td data-label="Дисциплина">{{ nagruzka.discipline.name }}</td>
+                                    <td data-label="Факультет">{{ nagruzka.discipline.fakultet.name }}</td>
+                                    <td data-label="Преподаватель">{{ nagruzka.prepod.fio }}</td>
+                                    <td data-label="Ставка">{{ nagruzka.n_stavka }}</td>
+                                    <td data-label="Почасовка">{{ nagruzka.pochasovka|yes_no }}</td>
+                                    <td data-label="Спец.">{{ nagruzka.discipline.specialnost.name }}</td>
+                                    <td data-label="Курс">{{ nagruzka.discipline.kurs }}</td>
+                                    <td data-label="Сем.">{{ nagruzka.discipline.semestr }}</td>
+                                    <td data-label="Период">{{ nagruzka.discipline.period }}</td>
+                                    <td data-label="Недель">{{ nagruzka.discipline.nedeli }}</td>
+                                    <td data-label="Труд.">{{ nagruzka.discipline.trudoemkost }}</td>
+                                    <td data-label="В нед.">{{ nagruzka.discipline.chas_v_nedelu }}</td>
+                                    <td data-label="СРС">{{ nagruzka.discipline.srs }}</td>
+                                    <td data-label="По плану">{{ nagruzka.discipline.chas_po_planu }}</td>
+                                    <td data-label="Студ.">{{ nagruzka.student }}</td>
+                                    <td data-label="Групп">{{ nagruzka.discipline.group }}</td>
+                                    <td data-label="Подгр.">{{ nagruzka.discipline.podgroup }}</td>
+                                    <td data-label="ЛК">{{ nagruzka.lk }}</td>
+                                    <td data-label="ПР">{{ nagruzka.pr }}</td>
+                                    <td data-label="ЛР">{{ nagruzka.lr }}</td>
+                                    <td data-label="Зачет">{{ nagruzka.zachet }}</td>
+                                    <td data-label="Экзамен">{{ nagruzka.ekzamen }}</td>
+                                    <td data-label="Контр.р.">{{ nagruzka.kontr_raboti }}</td>
+                                    <td data-label="КР/КП">{{ nagruzka.kr_kp }}</td>
+                                    <td data-label="ВКР">{{ nagruzka.vkr }}</td>
+                                    <td data-label="Пр.пед.">{{ nagruzka.pr_ped }}</td>
+                                    <td data-label="Пр.др.">{{ nagruzka.pr_dr }}</td>
+                                    <td data-label="ГАК">{{ nagruzka.gak }}</td>
+                                    <td data-label="Асп./Маг.">{{ nagruzka.aspirantura }}</td>
+                                    <td data-label="Рук.">{{ nagruzka.rukovodstvo }}</td>
+                                    <td data-label="Доп.ч.">{{ nagruzka.dop_chasi }}</td>
+                                    <td data-label="ВСЕГО">{{ nagruzka.summary }}</td>
+                                    <td data-label="Кафедра">{{ nagruzka.discipline.kafedra.name }}</td>
+                                    <td data-label="Поток"
+                                        style="white-space: nowrap">{{ nagruzka.discipline.potok.name }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="child-center">
+                        <div class="ui pagination menu">
+                            {% for p in pages %}
+                                <a onclick="filter({{ p|add:1 }})"
+                                   class="{% if p|add:1 == page %} active {% endif %} item">
+                                    {{ p|add:1 }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui modal tiny">
+        <div class="header">Изменить преподавателя и ставку</div>
+        <div class="content no-shadow">
+            <form class="ui form">
+                <input type="hidden" name="nagruzka_id">
+                {% csrf_token %}
+                <div class="field">
+                    <label>Преподаватель</label>
+                    <div class="ui selection dropdown" data-name="prepod">
+                        <input type="hidden" name="prepod">
+                        <i class="dropdown icon"></i>
+                        <div class="default text"></div>
+                        <div class="menu">
+                            {% for prepod in prepods %}
+                                <div class="item" data-value="{{ prepod.id }}">{{ prepod.fio }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Назначенная ставка</label>
+                    <div class="ui selection dropdown" data-name="n_stavka">
+                        <input type="hidden" name="n_stavka">
+                        <i class="dropdown icon"></i>
+                        <div class="default text"></div>
+                        <div class="menu">
+                            {% for i, j in stavka_range %}
+                                <div class="item" data-value="{{ i }}">{{ j }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="inline field">
+                    <div class="ui checkbox">
+                        <input type="checkbox" tabindex="0" class="hidden" name="pochasovka">
+                        <label>Почасовка</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui button primary">Применить</div>
+            <div class="ui cancel button">Отмена</div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript" src="{% static 'js/table_sort.js' %}"></script>
+    <script type="text/javascript">
+        function filter(page = 0) {
+            var $form = $('form#filter')
+            if (page > 0) {
+                $form.find('input[name=page]').val(page)
+            }
+            $form.trigger('submit')
+        }
+
+        $(document).ready(function () {
+            var $modal = $('.modal.ui')
+
+            $('.dropdown.filter').each(function (i) {
+                $(this).dropdown('set selected', $(this).attr('data-preselect')).dropdown({
+                    clearable: true,
+                    onChange: function (){filter(1)}
+                })
+            })
+
+
+            function setupTrTable() {
+                $('table tbody tr').click(function () {
+                    var stavka = $(this).attr('data-stavka')
+                    var prepod_id = $(this).attr('data-prepod-id')
+                    var pochasovka = $(this).attr('data-pochasovka') === 'True'
+                    $modal.modal({autofocus: false}).modal('show')
+                    $modal.find('input[name=nagruzka_id]').val($(this).attr('data-id'))
+                    $modal.find('.dropdown').each(function (i) {
+                        if ($(this).attr('data-name') === 'prepod')
+                            $(this).dropdown('set selected', prepod_id)
+                        if ($(this).attr('data-name') === 'n_stavka')
+                            $(this).dropdown('set selected', stavka)
+                    })
+                    if (pochasovka) {
+                        $modal.find('.checkbox').checkbox('check')
+                    } else {
+                        $modal.find('.checkbox').checkbox('uncheck')
+                    }
+                })
+
+            }
+
+            setupTrTable()
+            $('.ui.modal .primary.button').click(function () {
+                var $btn = $(this)
+                $(this).addClass('loading')
+                $.post(window.location.href, $(this).closest('.modal').find('form').serialize(), function (data) {
+                    $('table').replaceWith($(data).find('table'))
+                    $btn.removeClass('loading')
+                    $modal.modal('hide')
+                    setupTrTable()
+                })
+            })
+        })
+    </script>
+{% endblock %}

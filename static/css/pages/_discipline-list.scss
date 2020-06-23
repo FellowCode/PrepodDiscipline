@@ -41,6 +41,11 @@
       &.right {
         float: right;
       }
+
+      form {
+        width: auto;
+        float: left;
+      }
     }
 
     .ui.selection.search{
